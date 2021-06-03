@@ -18,7 +18,7 @@ int main()
 {
     Board b( values );
 
-    std::vector<Board> states;
+    std::vector<Board> visitedStates;
 
     CoordCellList list = b.sortedPossibilities();
 

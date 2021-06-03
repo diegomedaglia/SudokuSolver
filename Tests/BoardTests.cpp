@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 
 #include "Board.h"
+#include "Utils.h"
 
 TEST( BoardTests, CTOR )
 {
@@ -242,4 +243,111 @@ TEST( BoardTests, sortedPossibilities )
                         
     EXPECT_EQ( std::get<ccCELL>( sorted[1] ).possibilities().size(), 3 );
     EXPECT_EQ( std::get<ccCELL>( sorted[2] ).possibilities().size(), 3 );
+}
+
+TEST( BoardTests, invalidBoardRow )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {1,2,3,4,5,6,1,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,7,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+        }
+    };
+    
+    std::shared_ptr<Board> board;
+
+    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+}
+
+TEST( BoardTests, invalidBoardCol )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {1,2,3,4,5,6,7,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {1,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+        }
+    };
+    
+    std::shared_ptr<Board> board;
+
+    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+}
+
+TEST( BoardTests, invalidBoardQuadrant )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {1,2,3,4,5,6,7,0,0},
+            {0,1,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+        }
+    };
+
+    std::shared_ptr<Board> board;
+
+    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+}
+
+TEST( BoardTests, solved )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {1,2,3,4,5,6,7,8,9},
+            {4,5,6,7,8,9,1,2,3},
+            {7,8,9,1,2,3,4,5,6},
+            {2,3,4,5,6,7,8,9,1},
+            {5,6,7,8,9,1,2,3,4},
+            {8,9,1,2,3,4,5,6,7},
+            {3,4,5,6,7,8,9,1,2},
+            {6,7,8,9,1,2,3,4,5},
+            {9,1,2,3,4,5,6,7,8},
+        }
+    };
+
+    Board b( values );
+
+    ASSERT_TRUE( b.sortedPossibilities().empty() );
+}
+
+TEST( BoardTests, simpleSolve )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,4,5,6,7,8,9},
+            {4,5,6,7,8,9,1,2,3},
+            {7,8,9,1,2,3,4,5,6},
+            {2,3,4,0,6,7,8,9,1},
+            {5,6,7,0,9,1,2,3,4},
+            {8,9,1,0,3,4,5,6,7},
+            {3,4,5,6,7,8,0,0,0},
+            {6,7,8,9,1,2,3,4,5},
+            {9,1,2,3,4,5,6,7,8},
+        }
+    };
+
+    Board b( values );
+
+    ASSERT_TRUE( b.sortedPossibilities().empty() );
+
+    std::cout << "solved board:" << std::endl << b << std::endl;
 }

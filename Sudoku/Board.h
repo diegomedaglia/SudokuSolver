@@ -3,6 +3,7 @@
 #include <array>
 #include <map>
 #include <utility>
+#include <functional>
 #include "Common.h"
 #include "Cell.h"
 
@@ -33,4 +34,10 @@ public:
 
 private:
     std::array<std::array<Cell, DIMS>, DIMS> m_board;
+    void validateBoard();
+    void validateInQuadrant( Num row, Num col );
+
+    void performInQuadrant( Num quadrant, std::function<void( int row, int col )> func );
+    
+    static std::string validationErrorBuilder( int row, int col, int row2, int col2 );
 };

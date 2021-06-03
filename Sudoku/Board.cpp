@@ -1,10 +1,10 @@
 #include <stdexcept>
 #include <algorithm>
 #include <string>
-#include "Board.h"
+#include <sstream>
 
-static void checkCoords( Num line, Num col );
-static void checkCoord( Num coord );
+#include "Board.h"
+#include "Utils.h"
 
 Board::Board( const std::array<std::array<Num, 9>, 9>& values )
 {
@@ -23,6 +23,9 @@ Board::Board( const std::array<std::array<Num, 9>, 9>& values )
             }
         }
     }
+
+    validateBoard();
+
     updatePossibleValues();
 }
 
@@ -125,26 +128,18 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
 {
     Nums existingNumbers;
     bool updatedOne = false;
-    
-    const int rowMult = ( quadrant / 3 );
-    const int colMult = ( quadrant % 3 );
 
-    const int startRow = rowMult * 3;
-    const int startCol = colMult * 3;
-
-    for( int i = startRow ; i < startRow + 3; ++i )
-    {
-        for( int j = startCol; j < startCol + 3; ++j )
+    performInQuadrant( quadrant, 
+        [this, &existingNumbers]( int i, int j )
         {
             if( m_board[i][j].hasVal() )
             {
                 existingNumbers.push_back( m_board[i][j].getVal() );
             }
-        }
-    }
-    for( int i = startRow; i < startRow + 3; ++i )
-    {
-        for( int j = startCol; j < startCol + 3; ++j )
+        } );
+
+    performInQuadrant( quadrant, 
+        [this, &existingNumbers, &updatedOne]( int i, int j )
         {
             if( !m_board[i][j].hasVal() )
             {
@@ -154,8 +149,8 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
                     updatedOne = true;
                 }
             }
-        }
-    }
+        } );
+    
     return updatedOne;
 }
 
@@ -171,18 +166,6 @@ void Board::set( int row, int col, Num number )
     m_board[row][col].setVal( number );
 
     updatePossibleValues();
-}
-
-static void checkCoords( Num line, Num col )
-{
-    checkCoord( line );
-    checkCoord( col );
-}
-
-static void checkCoord( Num coord )
-{
-    if( coord > 8 )
-        throw std::out_of_range( "invalid coordinate: " + std::to_string( coord ) );
 }
 
 CoordCellList Board::sortedPossibilities()
@@ -213,4 +196,86 @@ CoordCellList Board::sortedPossibilities()
         } );
 
     return result;
+}
+
+void Board::validateBoard()
+{
+    for( int i = 0; i < DIMS; ++i )
+    {
+        for( int j = 0; j < DIMS; ++j )
+        {
+            validateInQuadrant( i, j );
+
+            if( m_board[i][j].hasVal() )
+            {
+                auto val = m_board[i][j].getVal();
+                // search in row and column for same value
+                for( int k = 0; k < DIMS; ++k )
+                {
+                    if( k != i )
+                    {
+                        auto cell = m_board[k][j];
+                        if( cell.hasVal() && val == cell.getVal() )
+                            throw( std::invalid_argument( validationErrorBuilder( i, j, k, j ) ) );
+                    }
+                    if( k != j )
+                    {
+                        auto cell = m_board[i][k];
+                        if( cell.hasVal() && val == cell.getVal() )
+                            throw( std::invalid_argument( validationErrorBuilder( i, j, i, k ) ) );
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Board::validateInQuadrant( Num row, Num col )
+{
+    auto val = m_board[row][col].getVal();
+    if( val == 0 )
+        return;
+
+    bool found = false;
+    int offendingRow = 0;
+    int offendingCol = 0;
+    performInQuadrant( getQuadrant( row, col ),
+        [this, val, row, col, &found, &offendingRow, &offendingCol]( int k, int l )
+        {
+            if( row == k && col == l )
+                return;
+            if( m_board[k][l].hasVal() && m_board[k][l].getVal() == val )
+            {
+                found = true;
+                offendingRow = k;
+                offendingCol = l;
+            }
+        } );
+    if( found )
+        throw( std::invalid_argument( validationErrorBuilder( row, col, offendingRow, offendingCol ) ) );
+}
+
+std::string Board::validationErrorBuilder( int row, int col, int row2, int col2 )
+{
+    std::stringstream ss;
+    ss << "cell in (" << ( row + 1 ) << "," << ( col + 1 ) << ") has same value as ("
+        << ( row2 + 1 ) << "," << ( col2 + 1 ) << ")";
+    return ss.str();
+}
+
+void Board::performInQuadrant( Num quadrant, std::function<void( int row, int col )> func )
+{
+    const int rowMult = ( quadrant / 3 );
+    const int colMult = ( quadrant % 3 );
+
+    const int startRow = rowMult * 3;
+    const int startCol = colMult * 3;
+
+    for( int i = startRow; i < startRow + 3; ++i )
+    {
+        for( int j = startCol; j < startCol + 3; ++j )
+        {
+            func( i, j );
+        }
+    }
 }
