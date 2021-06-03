@@ -216,13 +216,13 @@ void Board::validateBoard()
                     {
                         auto cell = m_board[k][j];
                         if( cell.hasVal() && val == cell.getVal() )
-                            throw( std::invalid_argument( validationErrorBuilder( i, j, k, j ) ) );
+                            throw( std::invalid_argument( buildValidationError( i, j, k, j ) ) );
                     }
                     if( k != j )
                     {
                         auto cell = m_board[i][k];
                         if( cell.hasVal() && val == cell.getVal() )
-                            throw( std::invalid_argument( validationErrorBuilder( i, j, i, k ) ) );
+                            throw( std::invalid_argument( buildValidationError( i, j, i, k ) ) );
                     }
                 }
             }
@@ -232,6 +232,8 @@ void Board::validateBoard()
 
 void Board::validateInQuadrant( Num row, Num col )
 {
+    checkCoords( row, col );
+
     auto val = m_board[row][col].getVal();
     if( val == 0 )
         return;
@@ -252,10 +254,10 @@ void Board::validateInQuadrant( Num row, Num col )
             }
         } );
     if( found )
-        throw( std::invalid_argument( validationErrorBuilder( row, col, offendingRow, offendingCol ) ) );
+        throw( std::invalid_argument( buildValidationError( row, col, offendingRow, offendingCol ) ) );
 }
 
-std::string Board::validationErrorBuilder( int row, int col, int row2, int col2 )
+std::string Board::buildValidationError( int row, int col, int row2, int col2 )
 {
     std::stringstream ss;
     ss << "cell in (" << ( row + 1 ) << "," << ( col + 1 ) << ") has same value as ("

@@ -39,5 +39,5 @@ private:
 
     void performInQuadrant( Num quadrant, std::function<void( int row, int col )> func );
     
-    static std::string validationErrorBuilder( int row, int col, int row2, int col2 );
+    static std::string buildValidationError( int row, int col, int row2, int col2 );
 };
