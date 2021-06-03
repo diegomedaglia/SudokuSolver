@@ -24,9 +24,21 @@ Board::Board( const std::array<std::array<Num, 9>, 9>& values )
         }
     }
 
-    validateBoard();
+    if( !isValid() )
+        throw std::invalid_argument( "board has invalid values" );
 
     updatePossibleValues();
+}
+
+Board::Board( const Board& other )
+{
+    *this = other;
+}
+
+Board& Board::operator=( const Board& other )
+{
+    this->m_board = other.m_board;
+    return *this;
 }
 
 Cell Board::cell( int row, int col ) const
@@ -130,16 +142,17 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
     bool updatedOne = false;
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers]( int i, int j )
+        [this, &existingNumbers]( int i, int j ) -> bool
         {
             if( m_board[i][j].hasVal() )
             {
                 existingNumbers.push_back( m_board[i][j].getVal() );
             }
+            return true;
         } );
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers, &updatedOne]( int i, int j )
+        [this, &existingNumbers, &updatedOne]( int i, int j ) -> bool
         {
             if( !m_board[i][j].hasVal() )
             {
@@ -149,6 +162,7 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
                     updatedOne = true;
                 }
             }
+            return true;
         } );
     
     return updatedOne;
@@ -168,104 +182,183 @@ void Board::set( int row, int col, Num number )
     updatePossibleValues();
 }
 
-CoordCellList Board::sortedPossibilities()
+CoordPossibilitiesList Board::sortedPossibilities()
 {
-    CoordCellList result;
+    CoordPossibilitiesList result;
 
-    for( int i = 0; i < DIMS; ++i )
-    {
-        for( int j = 0; j < DIMS; ++j )
+    performInCells(
+        [&result]( int i, int j, Cell& cell )
         {
-            if( !m_board[i][j].hasVal() )
+            if( !cell.hasVal() )
             {
-                result.push_back( std::make_tuple( i, j, m_board[i][j] ) );
+                result.push_back( std::make_tuple( i, j, cell.possibilities() ) );
             }
-        }
-    }
+            return true;
+        } );
 
     std::sort( result.begin(), result.end(), 
-        []( const std::tuple<int, int, Cell>& lhs, const std::tuple<int, int, Cell>& rhs )
+        []( const CoordPossibilities& lhs, const CoordPossibilities& rhs )
         { 
-            const auto& cell1 = std::get<ccCELL>( lhs );
-            const auto& cell2 = std::get<ccCELL>( rhs );
+            const auto& poss1 = std::get<ccPOSSIBILITIES>( lhs );
+            const auto& poss2 = std::get<ccPOSSIBILITIES>( rhs );
 
-            auto cell1Possibilities = cell1.possibilities().size();
-            auto cell2Possibilities = cell2.possibilities().size();
+            auto poss1Size = poss1.size();
+            auto poss2Size = poss2.size();
 
-            return cell1Possibilities < cell2Possibilities;
+            return poss1Size < poss2Size;
         } );
 
     return result;
 }
 
-void Board::validateBoard()
+bool Board::isValid()
 {
-    for( int i = 0; i < DIMS; ++i )
-    {
-        for( int j = 0; j < DIMS; ++j )
-        {
-            validateInQuadrant( i, j );
+    bool result = true;
 
-            if( m_board[i][j].hasVal() )
+    performInCells(
+        [&result, this]( auto i, auto j, auto cell )
+        {
+            if( cell.possibilities().empty() )
             {
-                auto val = m_board[i][j].getVal();
+                m_offendingVal = std::make_tuple( i, j, 0, 0, 0 );
+                result = false;
+                return false;
+            }
+
+            if( !validateInQuadrant( i, j ) )
+            {
+                result = false;
+                return false;
+            }
+
+
+            if( cell.hasVal() )
+            {
+                auto val = cell.getVal();
                 // search in row and column for same value
                 for( int k = 0; k < DIMS; ++k )
                 {
                     if( k != i )
                     {
-                        auto cell = m_board[k][j];
-                        if( cell.hasVal() && val == cell.getVal() )
-                            throw( std::invalid_argument( buildValidationError( i, j, k, j ) ) );
+                        auto& cell2 = m_board[k][j];
+                        if( cell2.hasVal() && val == cell2.getVal() )
+                        {
+                            m_offendingVal = std::make_tuple( i, j, k, j, val );
+                            result = false;
+                            break;
+                        }
                     }
                     if( k != j )
                     {
-                        auto cell = m_board[i][k];
-                        if( cell.hasVal() && val == cell.getVal() )
-                            throw( std::invalid_argument( buildValidationError( i, j, i, k ) ) );
+                        auto& cell2 = m_board[i][k];
+                        if( cell2.hasVal() && val == cell2.getVal() )
+                        {
+                            m_offendingVal = std::make_tuple( i, j, i, k, val );
+                            result = false;
+                            break;
+                        }
                     }
                 }
             }
+            return result;
         }
-    }
+    );
+
+    return result;
 }
 
-void Board::validateInQuadrant( Num row, Num col )
+bool Board::isSolved()
+{
+    bool result = true;
+    performInCells( 
+        [&result]( auto i, auto j, auto cell )
+        { 
+            if( !cell.hasVal() )
+            {
+                result = false;
+                return false;
+            }
+            return true;
+        } );
+
+    return result;
+}
+
+bool Board::operator==( const Board& rhs ) const
+{
+    bool result = true;
+
+    performInCells(
+        [&result, &rhs](int i, int j, const Cell& cell )
+        {
+            if( cell.getVal() != rhs.at( i, j ) )
+            {
+                result = false;
+                return false;
+            }
+            return true;
+        }
+    );
+
+    return result;
+}
+
+bool Board::operator!=( const Board& rhs ) const
+{
+    return !operator==( rhs );
+}
+
+bool Board::validateInQuadrant( Num row, Num col )
 {
     checkCoords( row, col );
 
     auto val = m_board[row][col].getVal();
     if( val == 0 )
-        return;
+        return true;
 
     bool found = false;
-    int offendingRow = 0;
-    int offendingCol = 0;
     performInQuadrant( getQuadrant( row, col ),
-        [this, val, row, col, &found, &offendingRow, &offendingCol]( int k, int l )
+        [this, val, row, col, &found]( int k, int l )
         {
             if( row == k && col == l )
-                return;
+                return true;
+
             if( m_board[k][l].hasVal() && m_board[k][l].getVal() == val )
             {
+                m_offendingVal = std::make_tuple( row, col, k, l, val );
                 found = true;
-                offendingRow = k;
-                offendingCol = l;
             }
+            return !found;
         } );
-    if( found )
-        throw( std::invalid_argument( buildValidationError( row, col, offendingRow, offendingCol ) ) );
+
+    return !found;
 }
 
-std::string Board::buildValidationError( int row, int col, int row2, int col2 )
+void Board::performInCells( std::function<bool( int, int, Cell& )> func )
 {
-    std::stringstream ss;
-    ss << "cell in (" << ( row + 1 ) << "," << ( col + 1 ) << ") has same value as ("
-        << ( row2 + 1 ) << "," << ( col2 + 1 ) << ")";
-    return ss.str();
+    for( int i = 0; i < DIMS; ++i )
+    {
+        for( int j = 0; j < DIMS; ++j )
+        {
+            if( !func( i, j, m_board[i][j] ) )
+                return;
+        }
+    }
 }
 
-void Board::performInQuadrant( Num quadrant, std::function<void( int row, int col )> func )
+void Board::performInCells( std::function<bool( int, int, const Cell& )> func ) const
+{
+    for( int i = 0; i < DIMS; ++i )
+    {
+        for( int j = 0; j < DIMS; ++j )
+        {
+            if( !func( i, j, m_board[i][j] ) )
+                return;
+        }
+    }
+}
+
+void Board::performInQuadrant( Num quadrant, std::function<bool( int row, int col )> func )
 {
     const int rowMult = ( quadrant / 3 );
     const int colMult = ( quadrant % 3 );
@@ -277,7 +370,8 @@ void Board::performInQuadrant( Num quadrant, std::function<void( int row, int co
     {
         for( int j = startCol; j < startCol + 3; ++j )
         {
-            func( i, j );
+            if( !func( i, j ) )
+                return;
         }
     }
 }

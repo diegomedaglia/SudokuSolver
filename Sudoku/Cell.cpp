@@ -2,11 +2,12 @@
 #include <array>
 
 #include "Cell.h"
+#include "Utils.h"
 
-static constexpr std::array<Num, DIMS> possibilities{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+static constexpr std::array<Num, DIMS> startingPossibilities{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 Cell::Cell() :
-    m_possibilities( ::possibilities.begin(), ::possibilities.end() )
+    m_possibilities( startingPossibilities.begin(), startingPossibilities.end() )
 {
 }
 
@@ -26,7 +27,7 @@ void Cell::remove( const Nums& possibilities ) noexcept
         std::remove_if( m_possibilities.begin(), m_possibilities.end(),
             [&possibilities]( const Num& number )
             {
-                return std::find( possibilities.begin(), possibilities.end(), number ) != possibilities.end();
+                return contains( possibilities, number );
             }
     ), m_possibilities.end() );
 }

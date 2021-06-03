@@ -239,10 +239,10 @@ TEST( BoardTests, sortedPossibilities )
 
     EXPECT_EQ( std::get<ccROW>( sorted[0] ), 0 );
     EXPECT_EQ( std::get<ccCOL>( sorted[0] ), 6 );
-    EXPECT_EQ( std::get<ccCELL>( sorted[0] ).possibilities().size(), 2 );
+    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[0] ).size(), 2 );
                         
-    EXPECT_EQ( std::get<ccCELL>( sorted[1] ).possibilities().size(), 3 );
-    EXPECT_EQ( std::get<ccCELL>( sorted[2] ).possibilities().size(), 3 );
+    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[1] ).size(), 3 );
+    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[2] ).size(), 3 );
 }
 
 TEST( BoardTests, invalidBoardRow )
@@ -327,6 +327,7 @@ TEST( BoardTests, solved )
     Board b( values );
 
     ASSERT_TRUE( b.sortedPossibilities().empty() );
+    ASSERT_TRUE( b.isSolved() );
 }
 
 TEST( BoardTests, simpleSolve )
@@ -348,6 +349,83 @@ TEST( BoardTests, simpleSolve )
     Board b( values );
 
     ASSERT_TRUE( b.sortedPossibilities().empty() );
+    ASSERT_TRUE( b.isSolved() );
 
     std::cout << "solved board:" << std::endl << b << std::endl;
+}
+
+TEST( BoardTests, compare1 )
+{
+    Board b1;
+    Board b2;
+
+    ASSERT_EQ( b1, b2 );
+}
+
+TEST( BoardTests, compare2 )
+{
+    Board b1;
+    Board b2{ 
+        {
+            {
+                {0,0,0,4,5,6,7,8,9},
+                {4,5,6,7,8,9,1,2,3},
+                {7,8,9,1,2,3,4,5,6},
+                {2,3,4,0,6,7,8,9,1},
+                {5,6,7,0,9,1,2,3,4},
+                {8,9,1,0,3,4,5,6,7},
+                {3,4,5,6,7,8,0,0,0},
+                {6,7,8,9,1,2,3,4,5},
+                {9,1,2,3,4,5,6,7,8},
+            }
+        } 
+    };
+
+    ASSERT_NE( b1, b2 );
+}
+
+TEST( BoardTests, compare3 )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0, 0, 0, 4, 5, 6, 7, 8, 9},
+            { 4,5,6,7,8,9,1,2,3 },
+            { 7,8,9,1,2,3,4,5,6 },
+            { 2,3,4,0,6,7,8,9,1 },
+            { 5,6,7,0,9,1,2,3,4 },
+            { 8,9,1,0,3,4,5,6,7 },
+            { 3,4,5,6,7,8,0,0,0 },
+            { 6,7,8,9,1,2,3,4,5 },
+            { 9,1,2,3,4,5,6,7,8 },
+        }
+    };
+    
+    Board b1( values );
+    Board b2( values );
+
+    ASSERT_EQ( b1, b2 );
+}
+
+TEST( BoardTests, compare4 )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,0,0,0,0,0,0},
+            {5,9,0,0,3,4,6,0,0},
+            {0,6,0,0,0,0,0,8,0},
+            {4,0,0,0,0,8,0,0,9},
+            {0,1,0,0,0,0,0,7,6},
+            {0,0,0,0,0,0,5,0,0},
+            {0,7,0,9,0,0,0,0,3},
+            {3,0,0,8,0,0,2,6,0},
+            {0,5,0,0,7,0,0,0,0},
+        }
+    };
+
+    Board b1( values );
+    Board b2( values );
+
+    b2.set( 8, 8, 1 );
+
+    ASSERT_NE( b1, b2 );
 }
