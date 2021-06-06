@@ -6,23 +6,42 @@
 #include "Board.h"
 #include "Utils.h"
 
+struct CoordCell
+{
+    int row;
+    int col;
+    Cell& cell;
+};
+
+Board::Board()
+{
+    performInCells( 
+        [this]( auto i, auto j, Cell& cell ) 
+        { 
+            cell.row( i ); 
+            cell.col( j ); 
+            return true; 
+        } );
+}
+
 Board::Board( const std::array<std::array<Num, 9>, 9>& values )
 {
-    for( int i = 0; i < DIMS; ++i )
-    {
-        for( int j = 0; j < DIMS; ++j )
+    performInCells(
+        [this, &values]( auto i, auto j, Cell& cell )
         {
+            cell.row( i );
+            cell.col( j );
+
             auto& val = values[i][j];
+            checkValue( val );
+
             if( val != 0 )
             {
-                m_board[i][j].setVal( val );
+                cell.setVal( val );
             }
-            else
-            {
-                m_board[i][j] = Cell();
-            }
+            return true;
         }
-    }
+    );
 
     if( !isValid() )
         throw std::invalid_argument( "board has invalid values" );
@@ -55,13 +74,15 @@ void Board::updatePossibleValues() noexcept
         gotUpdate = false;
         for( int i = 0; i < DIMS; ++i )
         {
-            auto rowUpdated = updateInRow( i );
-            auto colUpdated = updateInCol( i );
-            auto qUpdated = updateInQuadrant( i );
+            gotUpdate |= updateInRow( i );
+            gotUpdate |= updateInCol( i );
+            gotUpdate |= updateInQuadrant( i );
 
-            if( !gotUpdate )
+            for( int j = 0; j < i; ++j )
             {
-                gotUpdate = rowUpdated || colUpdated || qUpdated;
+                gotUpdate |= updateGroup( getRowCells( j ) );
+                gotUpdate |= updateGroup( getColCells( j ) );
+                gotUpdate |= updateGroup( getQuadrantCells( j ) );
             }
         }
     }
@@ -80,21 +101,61 @@ bool Board::updateInRow( Num row ) noexcept
             existingNumbers.push_back( m_board[row][i].getVal() );
         }
     }
+
     for( int i = 0; i < DIMS; ++i )
     {
-        if( !m_board[row][i].hasVal() )
+        auto& cell = m_board[row][i];
+        if( !cell.hasVal() )
         {
-            m_board[row][i].remove( existingNumbers );
-            if( m_board[row][i].hasVal() )
-            {
-                updatedOne = true;
-            }
+            updatedOne |= cell.remove( existingNumbers );
         }
     }
 
     return updatedOne;
 }
 
+bool Board::updateGroup( const std::vector<Cell*>& group ) noexcept
+{
+    bool updatedOne = false;
+
+    // find 2, 3, and 4 subgroups of cells in the provided group
+    // with the same possibilities. E.g. two cells with possibilities = { 1, 2},
+    // three cells with possibilities = {1, 2, 4}.
+    for( int i = 2; i < 5; ++i )
+    {
+        std::vector<Cell*> cellsWithSamePossibilities;
+        for( auto cell : group )
+        {
+            if( cell->possibilities().size() == i )
+            {
+                cellsWithSamePossibilities.push_back( cell );
+            }
+        }
+        if( cellsWithSamePossibilities.size() == i )
+        {
+            bool allEqual = std::all_of( ++( cellsWithSamePossibilities.begin() ), cellsWithSamePossibilities.end(),
+                [&cellsWithSamePossibilities]( auto cell )
+                {
+                    return cell->possibilities() == cellsWithSamePossibilities.front()->possibilities();
+                }
+            );
+
+            if( allEqual )
+            {
+                auto possibilitiesToRemove = cellsWithSamePossibilities.front()->possibilities();
+                for( auto cell : group )
+                {
+                    // if the cellsWithSamePossibilities vector does not contain 'cell'
+                    if( std::find( cellsWithSamePossibilities.begin(), cellsWithSamePossibilities.end(), cell ) == cellsWithSamePossibilities.end() )
+                    {
+                        updatedOne |= cell->remove( possibilitiesToRemove );
+                    }
+                }
+            }
+        }
+    }
+    return updatedOne;
+}
 bool Board::updateInCol( Num col ) noexcept
 {
     Nums existingNumbers;
@@ -111,13 +172,10 @@ bool Board::updateInCol( Num col ) noexcept
     {
         if( !m_board[i][col].hasVal() )
         {
-            m_board[i][col].remove( existingNumbers );
-            if( m_board[i][col].hasVal() )
-            {
-                updatedOne = true;
-            }
+            updatedOne |= m_board[i][col].remove( existingNumbers );
         }
     }
+
     return updatedOne;
 }
 /*
@@ -142,29 +200,25 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
     bool updatedOne = false;
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers]( int i, int j ) -> bool
+        [this, &existingNumbers]( auto i, auto j, auto& cell ) 
         {
-            if( m_board[i][j].hasVal() )
+            if( cell.hasVal() )
             {
-                existingNumbers.push_back( m_board[i][j].getVal() );
+                existingNumbers.push_back( cell.getVal() );
             }
             return true;
         } );
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers, &updatedOne]( int i, int j ) -> bool
+        [this, &existingNumbers, &updatedOne]( auto i, auto j, auto& cell )
         {
-            if( !m_board[i][j].hasVal() )
+            if( !cell.hasVal() )
             {
-                m_board[i][j].remove( existingNumbers );
-                if( m_board[i][j].hasVal() )
-                {
-                    updatedOne = true;
-                }
+                updatedOne |= cell.remove( existingNumbers );
             }
             return true;
         } );
-    
+
     return updatedOne;
 }
 
@@ -187,7 +241,7 @@ CoordPossibilitiesList Board::sortedPossibilities()
     CoordPossibilitiesList result;
 
     performInCells(
-        [&result]( int i, int j, Cell& cell )
+        [&result]( auto i, auto j, auto& cell )
         {
             if( !cell.hasVal() )
             {
@@ -216,7 +270,7 @@ bool Board::isValid()
     bool result = true;
 
     performInCells(
-        [&result, this]( auto i, auto j, auto cell )
+        [&result, this]( auto i, auto j, auto& cell )
         {
             if( cell.possibilities().empty() )
             {
@@ -271,7 +325,7 @@ bool Board::isSolved()
 {
     bool result = true;
     performInCells( 
-        [&result]( auto i, auto j, auto cell )
+        [&result]( auto i, auto j, auto& cell )
         { 
             if( !cell.hasVal() )
             {
@@ -318,7 +372,7 @@ bool Board::validateInQuadrant( Num row, Num col )
 
     bool found = false;
     performInQuadrant( getQuadrant( row, col ),
-        [this, val, row, col, &found]( int k, int l )
+        [this, val, row, col, &found]( auto k, auto l, auto& cell )
         {
             if( row == k && col == l )
                 return true;
@@ -334,7 +388,7 @@ bool Board::validateInQuadrant( Num row, Num col )
     return !found;
 }
 
-void Board::performInCells( std::function<bool( int, int, Cell& )> func )
+void Board::performInCells( std::function<bool( const int, const int, Cell& )> func )
 {
     for( int i = 0; i < DIMS; ++i )
     {
@@ -346,7 +400,7 @@ void Board::performInCells( std::function<bool( int, int, Cell& )> func )
     }
 }
 
-void Board::performInCells( std::function<bool( int, int, const Cell& )> func ) const
+void Board::performInCells( std::function<bool( const int, const int, const Cell& )> func ) const
 {
     for( int i = 0; i < DIMS; ++i )
     {
@@ -358,7 +412,7 @@ void Board::performInCells( std::function<bool( int, int, const Cell& )> func ) 
     }
 }
 
-void Board::performInQuadrant( Num quadrant, std::function<bool( int row, int col )> func )
+void Board::performInQuadrant( Num quadrant, std::function<bool( const int row, const int col, Cell& cell )> func )
 {
     const int rowMult = ( quadrant / 3 );
     const int colMult = ( quadrant % 3 );
@@ -370,8 +424,68 @@ void Board::performInQuadrant( Num quadrant, std::function<bool( int row, int co
     {
         for( int j = startCol; j < startCol + 3; ++j )
         {
-            if( !func( i, j ) )
+            if( !func( i, j, m_board[i][j] ) )
                 return;
         }
     }
+}
+
+void Board::performInRow( int row, std::function<bool( const int, const int, Cell& )> func )
+{
+    checkCoord( row );
+
+    for( int i = 0; i < DIMS; ++i )
+    {
+        if( !func( row, i, m_board[row][i] ) )
+            break;
+    }
+}
+
+void Board::performInCol( int col, std::function<bool( const int, const int, Cell& )> func )
+{
+    checkCoord( col );
+
+    for( int i = 0; i < DIMS; ++i )
+    {
+        if( !func( i, col, m_board[i][col] ) )
+            break;
+    }
+}
+
+std::vector<Cell*> Board::getRowCells( int row )
+{
+    std::vector<Cell*> result;
+
+    for( int i = 0; i < DIMS; ++i )
+    {
+        Cell* cellPtr = m_board[row].data() + i;
+        result.push_back( cellPtr );
+    }
+
+    return result;
+}
+
+std::vector<Cell*> Board::getColCells( int col )
+{
+    std::vector<Cell*> result;
+
+    for( int i = 0; i < DIMS; ++i )
+    {
+        Cell* cellPtr = m_board[i].data() + col;
+        result.push_back( cellPtr );
+    }
+    return result;
+}
+
+std::vector<Cell*> Board::getQuadrantCells( int quadrant )
+{
+    std::vector<Cell*> result;
+
+    performInQuadrant( quadrant, [&result, this]( auto i, auto j, Cell& cell )
+        {
+            Cell* cellPtr = m_board[i].data() + j;
+            result.push_back( cellPtr );
+            return true;
+        } );
+    return result;
 }

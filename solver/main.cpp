@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "Utils.h"
 #include <iomanip>
+#include <chrono>
 
 using std::cout;
 using std::endl;
@@ -119,7 +120,11 @@ int main()
 {
     Board board( values );
 
+    const auto start = std::chrono::steady_clock::now();
+
     Board solution = solve( board );
+
+    const auto end = std::chrono::steady_clock::now();
 
     if( solution.isSolved() )
     {
@@ -131,5 +136,14 @@ int main()
         std::cout << "Could not solve!" << std::endl;
     }
     
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    cout << "Took " << elapsed_seconds.count() << "seconds" << endl;
+
+    auto hours = std::chrono::duration_cast< std::chrono::hours >( elapsed_seconds ).count();
+    auto minutes = std::chrono::duration_cast< std::chrono::minutes >( elapsed_seconds ).count() % 60;
+    auto seconds = std::chrono::duration_cast< std::chrono::seconds >( elapsed_seconds ).count() % 60;
+
+    cout << "( or " << hours << "h " << minutes << "m " << seconds << "s)" << endl;
+
     return 0;
 }

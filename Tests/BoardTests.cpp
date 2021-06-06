@@ -14,6 +14,8 @@ TEST( BoardTests, CTOR )
         {
             auto cell = b.cell( i, j );
             ASSERT_EQ( cell.possibilities(), ( Nums{ 1,2,3,4,5,6,7,8,9 } ) );
+            ASSERT_EQ( cell.row(), i );
+            ASSERT_EQ( cell.col(), j );
         }
     }
 }
@@ -134,11 +136,11 @@ TEST( BoardTests, CTOR_3 )
 
         for( int j = 1; j < 9; ++j )
         {
-            auto cell = b.cell( 0, j );
+            auto& cell = b.cell( 0, j );
             EXPECT_FALSE( cell.hasVal() );
             EXPECT_EQ( cell.possibilities(), ( Nums{2,3,4,5,6,7,8,9} ) );
 
-            cell = b.cell( j, 0 );
+            auto& otherCell = b.cell( j, 0 );
             EXPECT_FALSE( cell.hasVal() );
             EXPECT_EQ( cell.possibilities(), ( Nums{ 2,3,4,5,6,7,8,9 } ) );
         }
@@ -428,4 +430,146 @@ TEST( BoardTests, compare4 )
     b2.set( 8, 8, 1 );
 
     ASSERT_NE( b1, b2 );
+}
+
+TEST( BoardTests, getRow )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,0,0,0,0,0,0},
+            {5,9,0,0,3,4,6,0,0},
+            {0,6,0,0,0,0,0,8,0},
+            {4,0,0,0,0,8,0,0,9},
+            {0,1,0,0,0,0,0,7,6},
+            {0,0,0,0,0,0,5,0,0},
+            {0,7,0,9,0,0,0,0,3},
+            {3,0,0,8,0,0,2,6,0},
+            {0,5,0,0,7,0,0,0,0},
+        }
+    };
+
+    Board b1( values );
+    
+    auto row = b1.getRowCells( 1 );
+
+    EXPECT_EQ( row[0]->getVal(), 5 );
+    EXPECT_EQ( row[6]->getVal(), 6 );
+}
+
+TEST( BoardTests, getCol )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,0,0,0,0,0,0},
+            {5,9,0,0,3,4,6,0,0},
+            {0,6,0,0,0,0,0,8,0},
+            {4,0,0,0,0,8,0,0,9},
+            {0,1,0,0,0,0,0,7,6},
+            {0,0,0,0,0,0,5,0,0},
+            {0,7,0,9,0,0,0,0,3},
+            {3,0,0,8,0,0,2,6,0},
+            {0,5,0,0,7,0,0,0,0},
+        }
+    };
+
+    Board b1( values );
+
+    auto col = b1.getColCells( 1 );
+
+    EXPECT_EQ( col[1]->getVal(), 9 );
+    EXPECT_EQ( col[2]->getVal(), 6 );
+}
+
+TEST( BoardTests, getQuadrantCells )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,0,0,0,0,0,0},
+            {5,9,0,0,3,4,6,0,0},
+            {0,6,0,0,0,0,0,8,0},
+            {4,0,0,0,0,8,0,0,9},
+            {0,1,0,0,0,0,0,7,6},
+            {0,0,0,0,0,0,5,0,0},
+            {0,7,0,9,0,0,0,0,3},
+            {3,0,0,8,0,0,2,6,0},
+            {0,5,0,0,7,0,0,0,0},
+        }
+    };
+
+    Board b1( values );
+
+    auto q = b1.getQuadrantCells( 2 );
+
+    EXPECT_EQ( q[3]->getVal(), 6 );
+    EXPECT_EQ( q[7]->getVal(), 8 );
+}
+
+TEST( BoardTests, updateGroup1 )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,0,0,0,0,0,0,0,0},
+            {1,7,0,0,0,0,0,0,0},
+            {2,6,0,0,0,0,0,0,0},
+            {3,2,0,0,0,0,0,0,0},
+            {4,1,0,0,0,0,0,0,0},
+            {5,0,0,0,0,0,0,0,0},
+            {6,5,0,0,0,0,0,0,0},
+            {7,4,0,0,0,0,0,0,0},
+            {0,3,0,0,0,0,0,0,0},
+        }
+    };
+
+    Board b1( values );
+
+    ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
+    ASSERT_EQ( b1.cell( 0, 1 ).possibilities(), ( Nums{ 8,9 } ) );
+
+    for( int i = 2; i < DIMS; ++i )
+    {
+        auto possibilities = b1.cell( 0, i ).possibilities();
+        EXPECT_FALSE( contains( possibilities, 8 ) );
+        EXPECT_FALSE( contains( possibilities, 9 ) );
+    }
+
+    EXPECT_FALSE( contains( b1.cell( 1, 2 ).possibilities(), 8 ) );
+    EXPECT_FALSE( contains( b1.cell( 1, 2 ).possibilities(), 9 ) );
+                                        
+    EXPECT_FALSE( contains( b1.cell( 2, 2 ).possibilities(), 8 ) );
+    EXPECT_FALSE( contains( b1.cell( 2, 2 ).possibilities(), 9 ) );
+}
+
+TEST( BoardTests, updateGroup2 )
+{
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,1,2,3,4,5,6,7,0},
+            {0,7,6,2,1,0,5,4,3},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+
+        }
+    };
+
+    Board b1( values );
+
+    ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
+    ASSERT_EQ( b1.cell( 1, 0 ).possibilities(), ( Nums{ 8,9 } ) );
+
+    for( int i = 2; i < DIMS; ++i )
+    {
+        auto possibilities = b1.cell( i, 0 ).possibilities();
+        EXPECT_FALSE( contains( possibilities, 8 ) );
+        EXPECT_FALSE( contains( possibilities, 9 ) );
+    }
+    EXPECT_FALSE( contains( b1.cell( 2, 1 ).possibilities(), 8 ) );
+    EXPECT_FALSE( contains( b1.cell( 2, 2 ).possibilities(), 9 ) );
+                                     
+    EXPECT_FALSE( contains( b1.cell( 2, 1 ).possibilities(), 8 ) );
+    EXPECT_FALSE( contains( b1.cell( 2, 2 ).possibilities(), 9 ) );
 }

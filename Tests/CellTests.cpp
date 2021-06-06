@@ -54,3 +54,26 @@ TEST( CellTests, getVal )
     c.setVal( 1 );
     ASSERT_EQ( c.getVal(), 1 );
 }
+
+TEST( CellTests, compare )
+{
+    Cell c1;
+    Cell c2;
+
+    EXPECT_EQ( c1, c2 );
+
+    c1.row( 1 );
+    EXPECT_NE( c1, c2 );
+
+    c2.row( 1 );
+    c2.col( 1 );
+    EXPECT_NE( c1, c2 );
+
+    c1.col( 1 );
+
+    c1.remove( 1 );
+    EXPECT_NE( c1, c2 );
+
+    c2.remove( 1 );
+    EXPECT_EQ( c1, c2 );
+}

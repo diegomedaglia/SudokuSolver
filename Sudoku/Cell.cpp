@@ -7,7 +7,9 @@
 static constexpr std::array<Num, DIMS> startingPossibilities{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 Cell::Cell() :
-    m_possibilities( startingPossibilities.begin(), startingPossibilities.end() )
+    m_possibilities( startingPossibilities.begin(), startingPossibilities.end() ),
+    m_row( 0 ),
+    m_col( 0 )
 {
 }
 
@@ -21,8 +23,19 @@ void Cell::possibilities( const Nums& possibilities )
     m_possibilities = possibilities;
 }
 
-void Cell::remove( const Nums& possibilities ) noexcept
+bool Cell::operator==( const Cell& rhs ) const
 {
+    return m_row == rhs.row() && m_col == rhs.col() && m_possibilities == rhs.possibilities();
+}
+
+bool Cell::operator!=( const Cell& rhs ) const
+{
+    return !( operator==( rhs ) );
+}
+
+bool Cell::remove( const Nums& possibilities ) noexcept
+{
+    const auto size = m_possibilities.size();
     m_possibilities.erase(
         std::remove_if( m_possibilities.begin(), m_possibilities.end(),
             [&possibilities]( const Num& number )
@@ -30,14 +43,19 @@ void Cell::remove( const Nums& possibilities ) noexcept
                 return contains( possibilities, number );
             }
     ), m_possibilities.end() );
+
+    return size != m_possibilities.size();
 }
 
-void Cell::remove( Num n ) noexcept
+bool Cell::remove( Num n ) noexcept
 {
+    const auto size = m_possibilities.size();
     m_possibilities.erase(
         std::remove( m_possibilities.begin(), m_possibilities.end(), n ), 
         m_possibilities.end() 
     );
+
+    return size != m_possibilities.size();
 }
 
 bool Cell::hasVal() const noexcept
