@@ -43,8 +43,8 @@ static bool solve( Board b, std::unordered_set<size_t>& visitedStates, Board& so
         current.set( row, col, n );
 
         auto hash = boardHasher( current );
-
-        if( std::find( visitedStates.begin(), visitedStates.end(), hash ) != visitedStates.end() )
+                
+        if( visitedStates.find( hash ) != visitedStates.end() )
             continue;
 
         DEBUG( "not yet visited" );
