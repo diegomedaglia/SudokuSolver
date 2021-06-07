@@ -6,13 +6,6 @@
 #include "Board.h"
 #include "Utils.h"
 
-struct CoordCell
-{
-    int row;
-    int col;
-    Cell& cell;
-};
-
 Board::Board()
 {
     performInCells( 
@@ -156,6 +149,7 @@ bool Board::updateGroup( const std::vector<Cell*>& group ) noexcept
     }
     return updatedOne;
 }
+
 bool Board::updateInCol( Num col ) noexcept
 {
     Nums existingNumbers;
@@ -245,7 +239,7 @@ CoordPossibilitiesList Board::sortedPossibilities()
         {
             if( !cell.hasVal() )
             {
-                result.push_back( std::make_tuple( i, j, cell.possibilities() ) );
+                result.push_back( { i, j, cell.possibilities() } );
             }
             return true;
         } );
@@ -253,13 +247,7 @@ CoordPossibilitiesList Board::sortedPossibilities()
     std::sort( result.begin(), result.end(), 
         []( const CoordPossibilities& lhs, const CoordPossibilities& rhs )
         { 
-            const auto& poss1 = std::get<ccPOSSIBILITIES>( lhs );
-            const auto& poss2 = std::get<ccPOSSIBILITIES>( rhs );
-
-            auto poss1Size = poss1.size();
-            auto poss2Size = poss2.size();
-
-            return poss1Size < poss2Size;
+            return lhs.possibilities.size() < rhs.possibilities.size();
         } );
 
     return result;
@@ -340,21 +328,16 @@ bool Board::isSolved()
 
 bool Board::operator==( const Board& rhs ) const
 {
-    bool result = true;
-
-    performInCells(
-        [&result, &rhs](int i, int j, const Cell& cell )
+    for( int i = 0; i < DIMS; ++i )
+    {
+        for( int j = 0; j < DIMS; ++j )
         {
-            if( cell.getVal() != rhs.at( i, j ) )
-            {
-                result = false;
+            if( at( i, j ) != rhs.at( i, j ) )
                 return false;
-            }
-            return true;
         }
-    );
+    }
 
-    return result;
+    return true;
 }
 
 bool Board::operator!=( const Board& rhs ) const

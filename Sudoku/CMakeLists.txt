@@ -6,7 +6,11 @@ set( SOURCES
     "Board.h" 
     "Board.cpp"  
     "Common.h"
-     "Utils.h"  "Utils.cpp")
+    "Utils.h"  
+    "Utils.cpp" 
+    "FileParser.h" 
+    "FileParser.cpp"
+    )
 
 # Add source to this project's executable.
 add_library ( Sudoku ${SOURCES} )

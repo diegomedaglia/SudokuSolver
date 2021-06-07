@@ -7,15 +7,14 @@
 #include "Common.h"
 #include "Cell.h"
 
-using CoordPossibilities = std::tuple<int, int, Nums>;
-using CoordPossibilitiesList = std::vector<CoordPossibilities>;
-
-enum CoordCellMembers 
+struct CoordPossibilities 
 {
-    ccROW = 0,
-    ccCOL,
-    ccPOSSIBILITIES
+    int row;
+    int col;
+    Nums possibilities;
 };
+
+using CoordPossibilitiesList = std::vector<CoordPossibilities>;
 
 class Board
 {
@@ -60,5 +59,47 @@ private:
 
 
 
-    //friend struct std::hash<Board>;
+    friend struct std::hash<Board>;
+};
+
+namespace std
+{
+    inline void combineHash( size_t& seed, const size_t& hash )
+    {
+        seed ^= hash + 0x9e3779b9 + ( seed << 6 ) + ( seed >> 2 );
+    }
+
+    template<> struct hash<Board>
+    {
+        std::size_t operator()( Board const& b ) const noexcept
+        {
+            std::hash<std::uint64_t> u64Hasher;
+            std::hash<std::uint8_t> u8Hasher;
+
+            size_t seed = 0;
+
+            std::array<Num, 9> leftovers;
+
+            for(int i = 0; i < DIMS; ++i )
+            {
+                std::array<Num, DIMS> rowvals;
+                for( int j = 0; j < 8; ++j )
+                {
+                    rowvals[j] = b.at( i, j );
+                }
+
+                leftovers[i] = b.at( i, 8 );
+
+                const auto u64hash = u64Hasher( *( reinterpret_cast< const std::uint64_t* >( rowvals.data() ) ) );
+                combineHash( seed, u64hash );
+            }
+            const auto u64hash = u64Hasher( *( reinterpret_cast< const std::uint64_t* >( leftovers.data() ) ) );
+            combineHash( seed, u64hash );
+
+            const auto u8hash = u8Hasher( leftovers[8] );
+            combineHash( seed, u8hash );
+
+            return seed;
+        }
+    };
 };

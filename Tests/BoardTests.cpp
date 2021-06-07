@@ -239,12 +239,12 @@ TEST( BoardTests, sortedPossibilities )
 
     auto sorted = b.sortedPossibilities();
 
-    EXPECT_EQ( std::get<ccROW>( sorted[0] ), 0 );
-    EXPECT_EQ( std::get<ccCOL>( sorted[0] ), 6 );
-    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[0] ).size(), 2 );
+    EXPECT_EQ( sorted[0].row, 0 );
+    EXPECT_EQ( sorted[0].col, 6 );
+    EXPECT_EQ( sorted[0].possibilities.size(), 2 );
                         
-    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[1] ).size(), 3 );
-    EXPECT_EQ( std::get<ccPOSSIBILITIES>( sorted[2] ).size(), 3 );
+    EXPECT_EQ( sorted[1].possibilities.size(), 3 );
+    EXPECT_EQ( sorted[2].possibilities.size(), 3 );
 }
 
 TEST( BoardTests, invalidBoardRow )
@@ -572,4 +572,39 @@ TEST( BoardTests, updateGroup2 )
                                      
     EXPECT_FALSE( contains( b1.cell( 2, 1 ).possibilities(), 8 ) );
     EXPECT_FALSE( contains( b1.cell( 2, 2 ).possibilities(), 9 ) );
+}
+
+TEST( BoardTests, hash )
+{
+    std::hash<Board> boardHasher;
+    Board b;
+    Board b2;
+
+    EXPECT_EQ( boardHasher( b ), boardHasher( b2 ) );
+
+    std::array<std::array<Num, 9>, 9> values{
+        {
+            {0,1,2,3,4,5,6,7,0},
+            {0,7,6,2,1,0,5,4,3},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0},
+
+        }
+    };
+
+    Board b1( values );
+
+    EXPECT_NE( boardHasher( b1 ), boardHasher( b2 ) );
+
+    Board b3( values );
+
+    EXPECT_EQ( boardHasher( b1 ), boardHasher( b3 ) );
+
+    b3.set( 8, 8, 1 );
+    EXPECT_NE( boardHasher( b1 ), boardHasher( b3 ) );
 }
