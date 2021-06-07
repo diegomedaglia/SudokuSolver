@@ -223,7 +223,12 @@ private:
 
 namespace std
 {
-    template<> struct hash<Board>
+
+    /**
+    * Inject our hasher in namespace std by specializing std::hash.
+    */
+    template<> 
+    struct hash<Board>
     {
         std::size_t operator()( Board const& b ) const noexcept
         {

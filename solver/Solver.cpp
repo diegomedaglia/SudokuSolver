@@ -4,6 +4,13 @@
 
 #define DEBUG( message ) // { std::cout << message << std::endl; }
 
+/**
+* Solve a board using recursion backtracking.
+* @param b The board to solve in this recursion
+* @param visitedStates A set of hashes of boards to check if we already visited a given state
+* @param solution The board to copy the solution to in case we solve
+* @return True if the board was solved, false otherwise
+*/
 static bool solve( Board b, std::unordered_set<size_t>& visitedStates, Board& solution )
 {
     static BoardHasher boardHasher;
@@ -73,5 +80,5 @@ Board solve( Board board )
         DEBUG( "states visited: " << visitedStates.size() );
         return solution;
     }
-    return {};
+    return board;
 }
