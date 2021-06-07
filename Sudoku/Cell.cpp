@@ -4,6 +4,8 @@
 #include "Cell.h"
 #include "Utils.h"
 
+using namespace Sudoku;
+
 static constexpr std::array<Num, DIMS> startingPossibilities{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 Cell::Cell() :
@@ -21,12 +23,12 @@ void Cell::possibilities( const Nums& possibilities )
     m_possibilities = possibilities;
 }
 
-bool Cell::operator==( const Cell& rhs ) const
+bool Cell::operator==( const Cell& rhs ) const noexcept
 {
     return m_possibilities == rhs.possibilities();
 }
 
-bool Cell::operator!=( const Cell& rhs ) const
+bool Cell::operator!=( const Cell& rhs ) const noexcept
 {
     return !( operator==( rhs ) );
 }

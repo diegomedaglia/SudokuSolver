@@ -4,6 +4,8 @@
 
 #define DEBUG( message ) // { std::cout << message << std::endl; }
 
+namespace Sudoku
+{
 /**
 * Solve a board using recursion backtracking.
 * @param b The board to solve in this recursion
@@ -69,8 +71,9 @@ static bool solve( Board b, std::unordered_set<size_t>& visitedStates, Board& so
 
     return false;
 }
+}
 
-Board solve( Board board )
+Sudoku::Board Sudoku::solve( Board board )
 {
     std::unordered_set<size_t> visitedStates;
     Board solution;

@@ -3,6 +3,8 @@
 
 #include "FileParser.h"
 
+using namespace Sudoku;
+
 //0 0 0 0 0 0 0 0 0
 //5 9 0 0 3 4 6 0 0
 //0 6 0 0 0 0 0 8 0

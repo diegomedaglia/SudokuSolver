@@ -11,10 +11,10 @@ int main(int argc, char* argv[] )
         return 1;
     }
 
-    Board board;
+    Sudoku::Board board;
     try
     {
-        board = parseFile( argv[1] );
+        board = Sudoku::parseFile( argv[1] );
     }
     catch( std::exception& ex )
     {
@@ -24,7 +24,7 @@ int main(int argc, char* argv[] )
 
     const auto start = std::chrono::steady_clock::now();
 
-    Board s = solve( board );
+    auto s = solve( board );
 
     const auto end = std::chrono::steady_clock::now();
 

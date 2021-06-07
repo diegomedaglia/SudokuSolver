@@ -7,11 +7,14 @@
 #include "Common.h"
 #include "Cell.h"
 
+namespace Sudoku
+{
+
 /**
 * Structure used to store a board coordinate and a list
 * of possible values for that Cell.
 */
-struct CoordPossibilities 
+struct CoordPossibilities
 {
     int row;
     int col;
@@ -45,7 +48,7 @@ public:
     /**
     * Returns the assigned value for the specified cell. 0 is returned
     * for cells with no assigned value.
-    * 
+    *
     * @param row the cell row
     * @param col the cell column
     * @return The cell's value
@@ -94,8 +97,8 @@ public:
     * Retrieves the offending cells that caused the board to be invalid, in
     * the format (cell1 row, cell1 col, cell2 row, cell2 col, value). If a
     * cell with 0 possible values was the culprit, only one cell is returned.
-    * 
-    * @return the offending cells that caused the board to be invalid, 
+    *
+    * @return the offending cells that caused the board to be invalid,
     */
     std::tuple<int, int, int, int, Num> offendingVal() const { return m_offendingVal; }
     /**
@@ -123,21 +126,21 @@ public:
     bool operator==( const Board& rhs ) const;
     /**
     * Inequality operator. Two boards are not equal if some cell value does not match the other's
-     @return True if the boards are not equal, false otherwise.
+        @return True if the boards are not equal, false otherwise.
     */
     bool operator!=( const Board& rhs ) const;
-    
+
 private:
     std::array<std::array<Cell, DIMS>, DIMS> m_board;
     std::tuple<int, int, int, int, Num> m_offendingVal;
-    
+
     /**
     * Performs an actions for each cell of the board.
     * @param func the function to call for each cell. It will be called with the
     * row, column and Cell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInCells( std::function<bool( const int, const int, Cell&)> func);
+    void performInCells( std::function<bool( const int, const int, Cell& )> func );
     /**
     * Performs an actions for each cell of the board.
     * @param func the function to call for each cell. It will be called with the
@@ -206,7 +209,7 @@ class BoardHasher
 {
 public:
     /**
-    * Calculates the hash of the board. 
+    * Calculates the hash of the board.
     * @param b the board to calculate the hash for
     * @return the board's hash.
     */
@@ -221,21 +224,23 @@ private:
     std::hash<std::uint8_t> u8Hasher;
 };
 
+} // namespace
+
 namespace std
 {
 
     /**
     * Inject our hasher in namespace std by specializing std::hash.
     */
-    template<> 
-    struct hash<Board>
+    template<>
+    struct hash<Sudoku::Board>
     {
-        std::size_t operator()( Board const& b ) const noexcept
+        std::size_t operator()( Sudoku::Board const& b ) const noexcept
         {
             return hasher( b );
         }
-        BoardHasher hasher;
+        Sudoku::BoardHasher hasher;
     };
 }
 
-std::ostream& operator<<( std::ostream& stream, const Board& board );
+std::ostream& operator<<( std::ostream& stream, const Sudoku::Board& board );

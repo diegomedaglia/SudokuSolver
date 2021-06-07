@@ -6,6 +6,8 @@
 #include "Board.h"
 #include "Utils.h"
 
+using namespace Sudoku;
+
 Board::Board()
 {
     performInCells( 

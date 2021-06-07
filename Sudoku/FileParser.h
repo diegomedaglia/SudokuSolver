@@ -4,6 +4,9 @@
 #include <string>
 #include "Board.h"
 
+namespace Sudoku
+{
+
 /**
 * Parses a file containing a representation of a board. Cells are separated
 * by whitespace and have values in the range [0, 9]. 0 denotes empty cells.
@@ -13,3 +16,5 @@
 * @throw std::runtime_error An error occurred during parsing of the file.
 */
 Board parseFile( const std::string& filename );
+
+}

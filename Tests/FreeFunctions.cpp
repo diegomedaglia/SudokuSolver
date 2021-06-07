@@ -5,6 +5,8 @@
 #include "Common.h"
 #include "Utils.h"
 
+using namespace Sudoku;
+
 TEST( FreeFunctions, contains )
 {
     Nums n{ 1 };

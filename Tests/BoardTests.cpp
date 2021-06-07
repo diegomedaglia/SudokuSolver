@@ -4,6 +4,7 @@
 #include "Board.h"
 #include "Utils.h"
 
+using namespace Sudoku;
 TEST( BoardTests, CTOR )
 {
     Board b;

@@ -3,6 +3,8 @@
 
 #include "Cell.h"
 
+using namespace Sudoku;
+
 TEST( CellTests, CTOR )
 {
     Cell c;

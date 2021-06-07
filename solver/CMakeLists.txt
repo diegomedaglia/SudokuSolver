@@ -1,8 +1,6 @@
 
 set( SOURCES 
     main.cpp
-    Solver.cpp
-    Solver.h
 )
 
 add_executable( Solver ${SOURCES} )

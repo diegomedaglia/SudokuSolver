@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "Common.h"
 
+namespace Sudoku
+{
+
 /**
 * Represents a cell of a sudoku board.
 */
@@ -55,15 +58,17 @@ public:
     * @param rhs the cell to compare to this cell
     * @return true if both cells have the same possible values, false otherwise
     */
-    bool operator==( const Cell& rhs ) const;
+    bool operator==( const Cell& rhs ) const noexcept;
     /**
     * Compares two cells for inequality
     * @param rhs the cell to compare to this cell
     * @return true if the cells do not have the same possible values, false otherwise
     */
-    bool operator!=( const Cell& rhs ) const;
+    bool operator!=( const Cell& rhs ) const noexcept;
 private:
     Nums m_possibilities;
 };
 
 using Cells = std::vector<Cell>;
+
+}

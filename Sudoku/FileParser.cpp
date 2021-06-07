@@ -4,7 +4,7 @@
 
 #include "FileParser.h"
 
-Board parseFile( const std::string& filename )
+Sudoku::Board Sudoku::parseFile( const std::string& filename )
 {
     std::ifstream filestream{ filename };
     if( !filestream.is_open() )

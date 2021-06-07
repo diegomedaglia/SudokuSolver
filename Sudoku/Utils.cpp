@@ -3,25 +3,25 @@
 #include <stdexcept>
 #include <array>
 
-void checkCoords( Num line, Num col )
+void Sudoku::checkCoords( Num line, Num col )
 {
     checkCoord( line );
     checkCoord( col );
 }
 
-void checkCoord( Num coord )
+void Sudoku::checkCoord( Num coord )
 {
     if( coord > 8 )
         throw std::out_of_range( "invalid coordinate: " + std::to_string( coord ) );
 }
 
-void checkValue( Num value )
+void Sudoku::checkValue( Num value )
 {
     if ( value > 9 )
         throw std::invalid_argument( "invalid value: " + std::to_string( value ) );
 }
 
-int getQuadrant( Num row, Num col )
+int Sudoku::getQuadrant( Num row, Num col )
 {
     static constexpr std::array<std::array<Num, 3>, 3> quadrantNumbers{
     {

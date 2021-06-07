@@ -10,6 +10,8 @@ set( SOURCES
     "Utils.cpp" 
     "FileParser.h" 
     "FileParser.cpp"
+    "Solver.h"
+    "Solver.cpp"
     )
 
 # Add source to this project's executable.
