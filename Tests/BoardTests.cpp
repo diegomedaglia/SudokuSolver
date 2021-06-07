@@ -135,11 +135,11 @@ TEST( BoardTests, CTOR_3 )
 
         for( int j = 1; j < 9; ++j )
         {
-            auto& cell = b.cell( 0, j );
+            auto cell = b.cell( 0, j );
             EXPECT_FALSE( cell.hasVal() );
             EXPECT_EQ( cell.possibilities(), ( Nums{2,3,4,5,6,7,8,9} ) );
 
-            auto& otherCell = b.cell( j, 0 );
+            auto otherCell = b.cell( j, 0 );
             EXPECT_FALSE( cell.hasVal() );
             EXPECT_EQ( cell.possibilities(), ( Nums{ 2,3,4,5,6,7,8,9 } ) );
         }
