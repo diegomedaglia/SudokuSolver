@@ -232,3 +232,5 @@ namespace std
         BoardHasher hasher;
     };
 }
+
+std::ostream& operator<<( std::ostream& stream, const Board& board );

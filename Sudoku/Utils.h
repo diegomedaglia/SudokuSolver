@@ -1,7 +1,5 @@
 #pragma once
-#include "Board.h"
-
-std::ostream& operator<<( std::ostream& stream, const Board& board );
+#include "Common.h"
 
 void checkCoords( Num line, Num col );
 void checkCoord( Num coord );

@@ -606,3 +606,24 @@ TEST( BoardTests, hash )
     b3.set( 8, 8, 1 );
     EXPECT_NE( boardHasher( b1 ), boardHasher( b3 ) );
 }
+
+TEST( BoardTests, printBoard )
+{
+    std::array<std::array<Num, 9>, 9> values{
+    {
+        {0,0,0,0,0,0,0,0,0},
+        {5,9,0,0,3,4,6,0,0},
+        {0,6,0,0,0,0,0,8,0},
+        {4,0,0,0,0,8,0,0,9},
+        {0,1,0,0,0,0,0,7,6},
+        {0,0,0,0,0,0,5,0,0},
+        {0,7,0,9,0,0,0,0,3},
+        {3,0,0,8,0,0,2,6,0},
+        {0,5,0,0,7,0,0,0,0},
+    }
+    };
+
+    Board b( values );
+
+    ASSERT_NO_THROW( std::cout << b << std::endl );
+}
