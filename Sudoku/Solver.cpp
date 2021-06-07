@@ -2,7 +2,11 @@
 #include <iostream>
 #include <unordered_set>
 
+#ifdef NDEBUG
+#define DEBUG( X ) 
+#else
 #define DEBUG( message ) // { std::cout << message << std::endl; }
+#endif
 
 namespace Sudoku
 {
@@ -61,12 +65,14 @@ static bool solve( Board b, std::unordered_set<size_t>& visitedStates, Board& so
                 return true;
             }
         }
+#ifndef NDEBUG
         else
         {
             auto offending = current.offendingVal();
             DEBUG( "NOT valid: " << std::get<0>( offending ) << ", " << std::get<1>( offending ) << ", "
                 << std::get<2>( offending ) << ", " << std::get<3>( offending ) << ", " << std::get<4>( offending ) );
         }
+#endif
     }
 
     return false;

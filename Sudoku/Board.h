@@ -218,7 +218,7 @@ public:
     /**
     * boost::hash_combine
     */
-    static void combineHash( size_t& seed, const size_t& hash ) noexcept;;
+    static void combineHash( size_t& seed, const size_t& hash ) noexcept;
 private:
     std::hash<std::uint64_t> u64Hasher;
     std::hash<std::uint8_t> u8Hasher;
