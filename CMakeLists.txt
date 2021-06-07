@@ -17,6 +17,6 @@ endif()
 
 enable_testing()
 add_subdirectory ("Sudoku")
-add_subdirectory ("solver")
+add_subdirectory ("Solver")
 add_subdirectory ("Tests")
 
