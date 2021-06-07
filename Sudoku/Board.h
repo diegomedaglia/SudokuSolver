@@ -16,8 +16,8 @@ namespace Sudoku
 */
 struct CoordPossibilities
 {
-    int row;
-    int col;
+    Num row;
+    Num col;
     Nums possibilities;
 };
 
@@ -32,7 +32,7 @@ public:
     /**
     * Contructs an empty board (i.e. all cells unassigned).
     */
-    Board();
+    Board() = default;
     /**
     * Contructs a board with the values provided.
     */
@@ -54,7 +54,7 @@ public:
     * @return The cell's value
     * @throw std::out_of_range if either coordinates are out of bounds
     */
-    Num at( int row, int col ) const;
+    Num at( Num row, Num col ) const;
     /**
     * Returns a copy of the cell at the specified location.
     *
@@ -63,7 +63,7 @@ public:
     * @return A copy of the cell instance
     * @throw std::out_of_range if either coordinates are out of bounds
     */
-    Cell cell( int row, int col ) const;
+    Cell cell( Num row, Num col ) const;
     /**
     * Assigns a value to the cell at the specified location.
     *
@@ -73,7 +73,7 @@ public:
     * @throw std::out_of_range if either coordinates are out of bounds
     * @throw std::invalid_argument if value is invalid
     */
-    void set( int row, int col, Num number );
+    void set( Num row, Num col, Num number );
     /**
     * Returns a list of coordinates to possible numbers sorted by
     * possibility list size in ascending order
@@ -100,25 +100,25 @@ public:
     *
     * @return the offending cells that caused the board to be invalid,
     */
-    std::tuple<int, int, int, int, Num> offendingVal() const { return m_offendingVal; }
+    std::tuple<Num, Num, Num, Num, Num> offendingVal() const { return m_offendingVal; }
     /**
     * Gets pointers to cells of the specified row
     * @param row the row
     * @return pointers to cells of the specified row
     */
-    std::vector<Cell*> getRowCells( int row );
+    std::vector<Cell*> getRowCells( Num row );
     /**
     * Gets pointers to cells of the specified column
     * @param col the column
     * @return pointers to cells of the specified column
     */
-    std::vector<Cell*> getColCells( int col );
+    std::vector<Cell*> getColCells( Num col );
     /**
     * Gets pointers to cells of the specified quadrant
     * @param quadrant the quadrant
     * @return pointers to cells of the specified quadrant
     */
-    std::vector<Cell*> getQuadrantCells( int quadrant );
+    std::vector<Cell*> getQuadrantCells( Num quadrant );
     /**
     * Equality operator. Two boards are equal if all cell values match.
     * @return True if the boards are equal, false otherwise.
@@ -132,7 +132,7 @@ public:
 
 private:
     std::array<std::array<Cell, DIMS>, DIMS> m_board;
-    std::tuple<int, int, int, int, Num> m_offendingVal;
+    std::tuple<Num, Num, Num, Num, Num> m_offendingVal;
 
     /**
     * Performs an actions for each cell of the board.
@@ -140,14 +140,14 @@ private:
     * row, column and Cell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInCells( std::function<bool( const int, const int, Cell& )> func );
+    void performInCells( std::function<bool( const Num, const Num, Cell& )> func );
     /**
     * Performs an actions for each cell of the board.
     * @param func the function to call for each cell. It will be called with the
     * row, column and Cell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInCells( std::function<bool( const int, const int, const Cell& func )> ) const;
+    void performInCells( std::function<bool( const Num, const Num, const Cell& func )> ) const;
     /**
     * Performs an actions for each cell of a quadrant.
     * @param quadrant The quadrant to perform the function in each cell
@@ -155,13 +155,13 @@ private:
     * row, column and Cell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInQuadrant( Num quadrant, std::function<bool( const int row, const int col, Cell& )> func );
+    void performInQuadrant( Num quadrant, std::function<bool( const Num row, const Num col, Cell& )> func );
     /**
     * Checks if the specified cell does not have repeated values.
     * @param quadrant the quadrant to check
     * @return True if there are no repeated values in the quadrant.
     */
-    bool validateQuadrant( int quadrant );
+    bool validateQuadrant( Num quadrant );
     /**
     * Causes the board to update possible cell values for
     * the current configuration.

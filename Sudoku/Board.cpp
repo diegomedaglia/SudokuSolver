@@ -8,15 +8,6 @@
 
 using namespace Sudoku;
 
-Board::Board()
-{
-    performInCells( 
-        [this]( auto i, auto j, Cell& cell ) 
-        { 
-            return true; 
-        } );
-}
-
 Board::Board( const std::array<std::array<Num, 9>, 9>& values )
 {
     performInCells(
@@ -50,7 +41,7 @@ Board& Board::operator=( const Board& other )
     return *this;
 }
 
-Cell Board::cell( int row, int col ) const
+Cell Board::cell( Num row, Num col ) const
 {
     checkCoords( row, col );
     return m_board[row][col];
@@ -62,13 +53,13 @@ void Board::updatePossibleValues() noexcept
     do
     {
         gotUpdate = false;
-        for( int i = 0; i < DIMS; ++i )
+        for( Num i = 0; i < DIMS; ++i )
         {
             gotUpdate |= updateInRow( i );
             gotUpdate |= updateInCol( i );
             gotUpdate |= updateInQuadrant( i );
 
-            for( int j = 0; j < i; ++j )
+            for( Num j = 0; j < i; ++j )
             {
                 gotUpdate |= updateGroup( getRowCells( j ) );
                 gotUpdate |= updateGroup( getColCells( j ) );
@@ -84,7 +75,7 @@ bool Board::updateInRow( Num row ) noexcept
     bool updatedOne = false;
 
     Nums existingNumbers;
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         if( m_board[row][i].hasVal() )
         {
@@ -92,7 +83,7 @@ bool Board::updateInRow( Num row ) noexcept
         }
     }
 
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         auto& cell = m_board[row][i];
         if( !cell.hasVal() )
@@ -111,7 +102,7 @@ bool Board::updateGroup( const std::vector<Cell*>& group ) noexcept
     // find 2, 3, and 4 subgroups of cells in the provided group
     // with the same possibilities. E.g. two cells with possibilities = { 1, 2},
     // three cells with possibilities = {1, 2, 4}.
-    for( int i = 2; i < 5; ++i )
+    for( Num i = 2; i < 5; ++i )
     {
         std::vector<Cell*> cellsWithSamePossibilities;
         for( auto cell : group )
@@ -152,14 +143,14 @@ bool Board::updateInCol( Num col ) noexcept
     Nums existingNumbers;
     bool updatedOne = false;
 
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         if( m_board[i][col].hasVal() )
         {
             existingNumbers.push_back( m_board[i][col].getVal() );
         }
     }
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         if( !m_board[i][col].hasVal() )
         {
@@ -191,7 +182,7 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
     bool updatedOne = false;
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers]( auto i, auto j, auto& cell ) 
+        [this, &existingNumbers]( auto , auto , auto& cell ) 
         {
             if( cell.hasVal() )
             {
@@ -201,7 +192,7 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
         } );
 
     performInQuadrant( quadrant, 
-        [this, &existingNumbers, &updatedOne]( auto i, auto j, auto& cell )
+        [this, &existingNumbers, &updatedOne]( auto , auto , auto& cell )
         {
             if( !cell.hasVal() )
             {
@@ -213,13 +204,13 @@ bool Board::updateInQuadrant( Num quadrant ) noexcept
     return updatedOne;
 }
 
-Num Board::at( int row, int col ) const
+Num Board::at( Num row, Num col ) const
 {
     checkCoords( row, col );
     return m_board[row][col].getVal();
 }
 
-void Board::set( int row, int col, Num number )
+void Board::set( Num row, Num col, Num number )
 {
     checkCoords( row, col );
     m_board[row][col].setVal( number );
@@ -259,7 +250,7 @@ bool Board::isValid()
         {
             if( cell.possibilities().empty() )
             {
-                m_offendingVal = std::make_tuple( i, j, 0, 0, 0 );
+                m_offendingVal = std::make_tuple( i, j, (Num) 0, ( Num ) 0, ( Num )0 );
                 result = false;
                 return false;
             }
@@ -268,7 +259,7 @@ bool Board::isValid()
             {
                 auto val = cell.getVal();
                 // search in row and column for same value
-                for( int k = 0; k < DIMS; ++k )
+                for( Num k = 0; k < DIMS; ++k )
                 {
                     if( k != i )
                     {
@@ -295,7 +286,7 @@ bool Board::isValid()
             return result;
         }
     );
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         if( !validateQuadrant( i ) )
         {
@@ -311,7 +302,7 @@ bool Board::isSolved() const noexcept
 {
     bool result = true;
     performInCells( 
-        [&result]( auto i, auto j, auto& cell )
+        [&result]( auto , auto , auto& cell )
         { 
             if( !cell.hasVal() )
             {
@@ -326,9 +317,9 @@ bool Board::isSolved() const noexcept
 
 bool Board::operator==( const Board& rhs ) const
 {
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
-        for( int j = 0; j < DIMS; ++j )
+        for( Num j = 0; j < DIMS; ++j )
         {
             if( at( i, j ) != rhs.at( i, j ) )
                 return false;
@@ -343,10 +334,10 @@ bool Board::operator!=( const Board& rhs ) const
     return !operator==( rhs );
 }
 
-bool Board::validateQuadrant( int quadrant)
+bool Board::validateQuadrant( Num quadrant)
 {
     bool found = false;
-    std::map<Num, std::pair<int, int>> values;
+    std::map<Num, std::pair<Num, Num>> values;
     performInQuadrant( quadrant,
         [this, &found, &values]( auto k, auto l, auto& cell )
         {
@@ -369,11 +360,11 @@ bool Board::validateQuadrant( int quadrant)
     return !found;
 }
 
-void Board::performInCells( std::function<bool( const int, const int, Cell& )> func )
+void Board::performInCells( std::function<bool( const Num, const Num, Cell& )> func )
 {
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
-        for( int j = 0; j < DIMS; ++j )
+        for( Num j = 0; j < DIMS; ++j )
         {
             if( !func( i, j, m_board[i][j] ) )
                 return;
@@ -381,11 +372,11 @@ void Board::performInCells( std::function<bool( const int, const int, Cell& )> f
     }
 }
 
-void Board::performInCells( std::function<bool( const int, const int, const Cell& )> func ) const
+void Board::performInCells( std::function<bool( const Num, const Num, const Cell& )> func ) const
 {
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
-        for( int j = 0; j < DIMS; ++j )
+        for( Num j = 0; j < DIMS; ++j )
         {
             if( !func( i, j, m_board[i][j] ) )
                 return;
@@ -393,17 +384,17 @@ void Board::performInCells( std::function<bool( const int, const int, const Cell
     }
 }
 
-void Board::performInQuadrant( Num quadrant, std::function<bool( const int row, const int col, Cell& cell )> func )
+void Board::performInQuadrant( Num quadrant, std::function<bool( const Num row, const Num col, Cell& cell )> func )
 {
-    const int rowMult = ( quadrant / 3 );
-    const int colMult = ( quadrant % 3 );
+    const Num rowMult = ( quadrant / 3 );
+    const Num colMult = ( quadrant % 3 );
 
-    const int startRow = rowMult * 3;
-    const int startCol = colMult * 3;
+    const Num startRow = rowMult * 3;
+    const Num startCol = colMult * 3;
 
-    for( int i = startRow; i < startRow + 3; ++i )
+    for( Num i = startRow; i < startRow + 3; ++i )
     {
-        for( int j = startCol; j < startCol + 3; ++j )
+        for( Num j = startCol; j < startCol + 3; ++j )
         {
             if( !func( i, j, m_board[i][j] ) )
                 return;
@@ -411,11 +402,11 @@ void Board::performInQuadrant( Num quadrant, std::function<bool( const int row, 
     }
 }
 
-std::vector<Cell*> Board::getRowCells( int row )
+std::vector<Cell*> Board::getRowCells( Num row )
 {
     std::vector<Cell*> result;
 
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         Cell* cellPtr = m_board[row].data() + i;
         result.push_back( cellPtr );
@@ -424,11 +415,11 @@ std::vector<Cell*> Board::getRowCells( int row )
     return result;
 }
 
-std::vector<Cell*> Board::getColCells( int col )
+std::vector<Cell*> Board::getColCells( Num col )
 {
     std::vector<Cell*> result;
 
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
         Cell* cellPtr = m_board[i].data() + col;
         result.push_back( cellPtr );
@@ -436,11 +427,11 @@ std::vector<Cell*> Board::getColCells( int col )
     return result;
 }
 
-std::vector<Cell*> Board::getQuadrantCells( int quadrant )
+std::vector<Cell*> Board::getQuadrantCells( Num quadrant )
 {
     std::vector<Cell*> result;
 
-    performInQuadrant( quadrant, [&result, this]( auto i, auto j, Cell& cell )
+    performInQuadrant( quadrant, [&result, this]( auto i, auto j, Cell&  )
         {
             Cell* cellPtr = m_board[i].data() + j;
             result.push_back( cellPtr );
@@ -459,12 +450,12 @@ std::size_t BoardHasher::operator()( Board const& b ) const noexcept
 {
     size_t seed = 0;
 
-    std::array<Num, 9> leftovers;
+    std::array<Num, 9> leftovers{};
 
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
-        std::array<Num, 8> rowvals;
-        for( int j = 0; j < 8; ++j )
+        std::array<Num, 8> rowvals{};
+        for( Num j = 0; j < 8; ++j )
         {
             rowvals[j] = b.at( i, j );
         }
@@ -494,9 +485,9 @@ void BoardHasher::combineHash( size_t& seed, const size_t& hash ) noexcept
 
 std::ostream& operator<<( std::ostream& stream, const Board& board )
 {
-    for( int i = 0; i < DIMS; ++i )
+    for( Num i = 0; i < DIMS; ++i )
     {
-        for( int j = 0; j < DIMS; ++j )
+        for( Num j = 0; j < DIMS; ++j )
         {
             stream << std::to_string( board.at( i, j ) ) << " ";
         }

@@ -9,9 +9,9 @@ TEST( BoardTests, CTOR )
 {
     Board b;
 
-    for( int i = 0; i < 9; ++i )
+    for( Num i = 0; i < 9; ++i )
     {
-        for( int j = 0; j < 9; ++j )
+        for( Num j = 0; j < 9; ++j )
         {
             auto cell = b.cell( i, j );
             ASSERT_EQ( cell.possibilities(), ( Nums{ 1,2,3,4,5,6,7,8,9 } ) );
@@ -62,9 +62,9 @@ TEST( BoardTests, updateInQuadrant )
 {
     Board b;
 
-    for( int row = 0; row < 7; row += 3 )
+    for( Num row = 0; row < 7; row += 3 )
     {
-        for( int col = 0; col < 7; col += 3 )
+        for( Num col = 0; col < 7; col += 3 )
         {
             b.set( row, col, 1 );
             auto cell = b.cell( row, col );
@@ -101,9 +101,9 @@ TEST( BoardTests, CTOR_2 )
     
     Board b( values );
 
-    for( int i = 0; i < 9; ++i )
+    for( Num i = 0; i < 9; ++i )
     {
-        for( int j = 0; j < 9; ++j )
+        for( Num j = 0; j < 9; ++j )
         {
             auto cell = b.cell( i, j );
             if( values[i][j] != 0 )
@@ -133,7 +133,7 @@ TEST( BoardTests, CTOR_3 )
 
     Board b( values );
 
-        for( int j = 1; j < 9; ++j )
+        for( Num j = 1; j < 9; ++j )
         {
             auto cell = b.cell( 0, j );
             EXPECT_FALSE( cell.hasVal() );
@@ -524,7 +524,7 @@ TEST( BoardTests, updateGroup1 )
     ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
     ASSERT_EQ( b1.cell( 0, 1 ).possibilities(), ( Nums{ 8,9 } ) );
 
-    for( int i = 2; i < DIMS; ++i )
+    for( Num i = 2; i < DIMS; ++i )
     {
         auto possibilities = b1.cell( 0, i ).possibilities();
         EXPECT_FALSE( contains( possibilities, 8 ) );
@@ -560,7 +560,7 @@ TEST( BoardTests, updateGroup2 )
     ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
     ASSERT_EQ( b1.cell( 1, 0 ).possibilities(), ( Nums{ 8,9 } ) );
 
-    for( int i = 2; i < DIMS; ++i )
+    for( Num i = 2; i < DIMS; ++i )
     {
         auto possibilities = b1.cell( i, 0 ).possibilities();
         EXPECT_FALSE( contains( possibilities, 8 ) );
@@ -575,7 +575,7 @@ TEST( BoardTests, updateGroup2 )
 
 TEST( BoardTests, hash )
 {
-    BoardHasher boardHasher;
+    BoardHasher boardHasher{};
     Board b;
     Board b2;
 
