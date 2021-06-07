@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 
-enable_testing()
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -13,7 +13,14 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(SudokuTests  "CellTests.cpp" "BoardTests.cpp" "FreeFunctions.cpp" "FileParserTests.cpp")
 target_link_libraries(SudokuTests Sudoku gmock gtest gtest_main)
-add_test(SudokuTests SudokuTests)
+
+include(GoogleTest)
+gtest_discover_tests(SudokuTests
+  PROPERTIES
+    LABELS "unit"
+  DISCOVERY_TIMEOUT  # how long to wait (in seconds) before crashing
+    240
+  )
 
 add_custom_command(
         TARGET SudokuTests POST_BUILD
