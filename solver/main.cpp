@@ -24,7 +24,7 @@ int main(int argc, char* argv[] )
 
     const auto start = std::chrono::steady_clock::now();
 
-    auto s = solve( board );
+    auto s = Sudoku::solve( board );
 
     const auto end = std::chrono::steady_clock::now();
 
