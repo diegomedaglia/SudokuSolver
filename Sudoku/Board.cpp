@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <string>
-#include <sstream>
+#include <map>
 
 #include "Board.h"
 #include "Utils.h"

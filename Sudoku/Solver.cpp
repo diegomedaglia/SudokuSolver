@@ -1,12 +1,13 @@
-#include "Solver.h"
-#include <iostream>
 #include <unordered_set>
 
 #ifdef NDEBUG
 #define DEBUG( X ) 
 #else
-#define DEBUG( message ) // { std::cout << message << std::endl; }
+#include <iostream>
+#define DEBUG( message ) { std::cout << message << std::endl; }
 #endif
+
+#include "Solver.h"
 
 namespace Sudoku
 {

@@ -5,7 +5,7 @@ namespace Sudoku
 {
 
 /**
-* Solves the given board using backtracking.
+* @brief Solves the given board using backtracking.
 * @param board The board to solve.
 * @return The solved board, or 'board' if no solution was found.
 */

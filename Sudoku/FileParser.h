@@ -8,7 +8,7 @@ namespace Sudoku
 {
 
 /**
-* Parses a file containing a representation of a board. Cells are separated
+* @brief Parses a file containing a representation of a board. Cells are separated
 * by whitespace and have values in the range [0, 9]. 0 denotes empty cells.
 * @param filename the path to the file
 * @return A board with the values specified in the file

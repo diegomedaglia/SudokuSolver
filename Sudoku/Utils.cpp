@@ -1,7 +1,8 @@
-#include "Utils.h"
 #include <string>
 #include <stdexcept>
 #include <array>
+
+#include "Utils.h"
 
 void Sudoku::checkCoords( Num line, Num col )
 {
@@ -19,18 +20,4 @@ void Sudoku::checkValue( Num value )
 {
     if ( value > 9 )
         throw std::invalid_argument( "invalid value: " + std::to_string( value ) );
-}
-
-int Sudoku::getQuadrant( Num row, Num col )
-{
-    static constexpr std::array<std::array<Num, 3>, 3> quadrantNumbers{
-    {
-        { 0, 1, 2 },
-        { 3, 4, 5 },
-        { 6, 7, 8 },
-    } };
-
-    checkCoords( row, col );
-
-    return quadrantNumbers[row / 3][col / 3];
 }
