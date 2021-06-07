@@ -11,8 +11,6 @@ Board::Board()
     performInCells( 
         [this]( auto i, auto j, Cell& cell ) 
         { 
-            cell.row( i ); 
-            cell.col( j ); 
             return true; 
         } );
 }
@@ -22,9 +20,6 @@ Board::Board( const std::array<std::array<Num, 9>, 9>& values )
     performInCells(
         [this, &values]( auto i, auto j, Cell& cell )
         {
-            cell.row( i );
-            cell.col( j );
-
             auto& val = values[i][j];
             checkValue( val );
 
@@ -267,13 +262,6 @@ bool Board::isValid()
                 return false;
             }
 
-            if( !validateInQuadrant( i, j ) )
-            {
-                result = false;
-                return false;
-            }
-
-
             if( cell.hasVal() )
             {
                 auto val = cell.getVal();
@@ -305,11 +293,19 @@ bool Board::isValid()
             return result;
         }
     );
+    for( int i = 0; i < DIMS; ++i )
+    {
+        if( !validateQuadrant( i ) )
+        {
+            result = false;
+            break;
+        }
+    }
 
     return result;
 }
 
-bool Board::isSolved()
+bool Board::isSolved() const noexcept
 {
     bool result = true;
     performInCells( 
@@ -345,25 +341,25 @@ bool Board::operator!=( const Board& rhs ) const
     return !operator==( rhs );
 }
 
-bool Board::validateInQuadrant( Num row, Num col )
+bool Board::validateQuadrant( int quadrant)
 {
-    checkCoords( row, col );
-
-    auto val = m_board[row][col].getVal();
-    if( val == 0 )
-        return true;
-
     bool found = false;
-    performInQuadrant( getQuadrant( row, col ),
-        [this, val, row, col, &found]( auto k, auto l, auto& cell )
+    std::map<Num, std::pair<int, int>> values;
+    performInQuadrant( quadrant,
+        [this, &found, &values]( auto k, auto l, auto& cell )
         {
-            if( row == k && col == l )
-                return true;
-
-            if( m_board[k][l].hasVal() && m_board[k][l].getVal() == val )
+            if( cell.hasVal() )
             {
-                m_offendingVal = std::make_tuple( row, col, k, l, val );
-                found = true;
+                auto val = cell.getVal();
+                if( values.find( val ) != values.end() )
+                {
+                    m_offendingVal = std::make_tuple( k, l, std::get<0>( values[val] ), std::get<1>( values[val] ), val );
+                    found = true;
+                }
+                else
+                {
+                    values[val] = std::make_pair( k, l );
+                }
             }
             return !found;
         } );
@@ -413,28 +409,6 @@ void Board::performInQuadrant( Num quadrant, std::function<bool( const int row, 
     }
 }
 
-void Board::performInRow( int row, std::function<bool( const int, const int, Cell& )> func )
-{
-    checkCoord( row );
-
-    for( int i = 0; i < DIMS; ++i )
-    {
-        if( !func( row, i, m_board[row][i] ) )
-            break;
-    }
-}
-
-void Board::performInCol( int col, std::function<bool( const int, const int, Cell& )> func )
-{
-    checkCoord( col );
-
-    for( int i = 0; i < DIMS; ++i )
-    {
-        if( !func( i, col, m_board[i][col] ) )
-            break;
-    }
-}
-
 std::vector<Cell*> Board::getRowCells( int row )
 {
     std::vector<Cell*> result;
@@ -471,4 +445,47 @@ std::vector<Cell*> Board::getQuadrantCells( int quadrant )
             return true;
         } );
     return result;
+}
+
+/**
+* Calculates the hash of the board.
+* @param b the board to calculate the hash for
+* @return the board's hash.
+*/
+
+std::size_t BoardHasher::operator()( Board const& b ) const noexcept
+{
+    size_t seed = 0;
+
+    std::array<Num, 9> leftovers;
+
+    for( int i = 0; i < DIMS; ++i )
+    {
+        std::array<Num, 8> rowvals;
+        for( int j = 0; j < 8; ++j )
+        {
+            rowvals[j] = b.at( i, j );
+        }
+
+        leftovers[i] = b.at( i, 8 );
+
+        const auto u64hash = u64Hasher( *( reinterpret_cast< const std::uint64_t* >( rowvals.data() ) ) );
+        combineHash( seed, u64hash );
+    }
+    const auto u64hash = u64Hasher( *( reinterpret_cast< const std::uint64_t* >( leftovers.data() ) ) );
+    combineHash( seed, u64hash );
+
+    const auto u8hash = u8Hasher( leftovers[8] );
+    combineHash( seed, u8hash );
+
+    return seed;
+}
+
+/**
+* boost::hash_combine
+*/
+
+void BoardHasher::combineHash( size_t& seed, const size_t& hash ) noexcept
+{
+    seed ^= hash + 0x9e3779b9 + ( seed << 6 ) + ( seed >> 2 );
 }

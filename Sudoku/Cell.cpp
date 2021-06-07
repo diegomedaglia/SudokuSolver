@@ -7,9 +7,7 @@
 static constexpr std::array<Num, DIMS> startingPossibilities{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 Cell::Cell() :
-    m_possibilities( startingPossibilities.begin(), startingPossibilities.end() ),
-    m_row( 0 ),
-    m_col( 0 )
+    m_possibilities( startingPossibilities.begin(), startingPossibilities.end() )
 {
 }
 
@@ -25,7 +23,7 @@ void Cell::possibilities( const Nums& possibilities )
 
 bool Cell::operator==( const Cell& rhs ) const
 {
-    return m_row == rhs.row() && m_col == rhs.col() && m_possibilities == rhs.possibilities();
+    return m_possibilities == rhs.possibilities();
 }
 
 bool Cell::operator!=( const Cell& rhs ) const
@@ -73,5 +71,6 @@ Num Cell::getVal() const noexcept
 
 void Cell::setVal( Num val ) noexcept
 {
+    checkValue( val );
     m_possibilities = { val };
 }

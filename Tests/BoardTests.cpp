@@ -14,8 +14,6 @@ TEST( BoardTests, CTOR )
         {
             auto cell = b.cell( i, j );
             ASSERT_EQ( cell.possibilities(), ( Nums{ 1,2,3,4,5,6,7,8,9 } ) );
-            ASSERT_EQ( cell.row(), i );
-            ASSERT_EQ( cell.col(), j );
         }
     }
 }
@@ -576,7 +574,7 @@ TEST( BoardTests, updateGroup2 )
 
 TEST( BoardTests, hash )
 {
-    std::hash<Board> boardHasher;
+    BoardHasher boardHasher;
     Board b;
     Board b2;
 

@@ -6,23 +6,21 @@
 #include "Utils.h"
 #include "FileParser.h"
 
-#define DEBUG( message, level ) //do { std::cout << std::setw(level * 2) << "" << message << std::endl; } while( false )
+#define DEBUG( message ) // { std::cout << message << std::endl; }
 
-Board solution;
-std::hash<Board> boardHasher;
-
-bool solve( Board b, std::unordered_set<size_t>& visitedStates, int currentLevel )
+bool solve( Board b, std::unordered_set<size_t>& visitedStates, Board& solution )
 {
-    DEBUG( "level is " << currentLevel, currentLevel );
-    DEBUG( "Board is " << std::endl << b, currentLevel);
+    static BoardHasher boardHasher;
+
+    DEBUG( "Board is " << std::endl << b );
 
     if( b.isSolved() )
     {
-        DEBUG( "Solved!!!" << std::endl<< b, currentLevel );
+        DEBUG( "Solved!!!" << std::endl<< b );
         solution = b;
         return true;
     }
-    DEBUG( "not solved", currentLevel );
+    DEBUG( "not solved" );
 
     auto list = b.sortedPossibilities();
      
@@ -44,16 +42,16 @@ bool solve( Board b, std::unordered_set<size_t>& visitedStates, int currentLevel
         if( std::find( visitedStates.begin(), visitedStates.end(), hash ) != visitedStates.end() )
             continue;
 
-        DEBUG( "not yet visited", currentLevel );
+        DEBUG( "not yet visited" );
 
         visitedStates.insert( hash );
 
-        DEBUG( "Trying (" << row << "," << col << ") set to " << static_cast<int>( n ), currentLevel );
-        DEBUG( "board after update: " << std::endl << current << std::endl, currentLevel );
+        DEBUG( "Trying (" << row << "," << col << ") set to " << static_cast<int>( n ) );
+        DEBUG( "board after update: " << std::endl << current << std::endl );
 
         if( current.isValid() )
         {
-            if( solve( current, visitedStates, ++currentLevel ) )
+            if( solve( current, visitedStates, solution ) )
             {
                 return true;
             }
@@ -62,7 +60,7 @@ bool solve( Board b, std::unordered_set<size_t>& visitedStates, int currentLevel
         {
             auto offending = current.offendingVal();
             DEBUG( "NOT valid: " << std::get<0>( offending ) << ", " << std::get<1>( offending ) << ", " 
-                << std::get<2>( offending ) << ", " << std::get<3>( offending ) << ", " << std::get<4>( offending ), currentLevel);
+                << std::get<2>( offending ) << ", " << std::get<3>( offending ) << ", " << std::get<4>( offending ));
         }
     }
         
@@ -72,10 +70,11 @@ bool solve( Board b, std::unordered_set<size_t>& visitedStates, int currentLevel
 Board solve( Board board )
 {
     std::unordered_set<size_t> visitedStates;
+    Board solution;
 
-    if( solve( board, visitedStates, 0 ) )
+    if( solve( board, visitedStates, solution ) )
     {
-        DEBUG( "states visited: " << visitedStates.size(), 0 );
+        DEBUG( "states visited: " << visitedStates.size() );
         return solution;
     }
     return {};

@@ -62,15 +62,6 @@ TEST( CellTests, compare )
 
     EXPECT_EQ( c1, c2 );
 
-    c1.row( 1 );
-    EXPECT_NE( c1, c2 );
-
-    c2.row( 1 );
-    c2.col( 1 );
-    EXPECT_NE( c1, c2 );
-
-    c1.col( 1 );
-
     c1.remove( 1 );
     EXPECT_NE( c1, c2 );
 
