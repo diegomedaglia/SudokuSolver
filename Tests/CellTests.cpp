@@ -4,15 +4,17 @@
 
 using namespace Sudoku;
 
+using TestCell = Cell<9>;
+
 TEST( CellTests, CTOR )
 {
-    Cell c;
+    TestCell c;
     ASSERT_EQ( c.possibilities(), ( Nums{1, 2, 3, 4, 5, 6, 7, 8, 9} ) );
 }
 
 TEST( CellTests, removePossibilities )
 {
-    Cell c;
+    TestCell c;
     ASSERT_EQ( c.getVal(), 0 );
 
     c.remove( ( Nums{ 3, 4, 5, 6, 7, 8, 9 } ) );
@@ -23,7 +25,7 @@ TEST( CellTests, removePossibilities )
 
 TEST( CellTests, hasVal )
 {
-    Cell c;
+    TestCell c;
     ASSERT_FALSE( c.hasVal() );
 
     c.remove( ( Nums{ 3, 4, 5, 6, 7, 8, 9 } ) );
@@ -35,7 +37,7 @@ TEST( CellTests, hasVal )
 
 TEST( CellTests, setVal )
 {
-    Cell c;
+    TestCell c;
     ASSERT_EQ( c.getVal(), 0 );
     ASSERT_EQ( c.possibilities().size(), 9 );
 
@@ -46,7 +48,7 @@ TEST( CellTests, setVal )
 
 TEST( CellTests, getVal )
 {
-    Cell c;
+    TestCell c;
     ASSERT_EQ( c.getVal(), 0 );
 
     c.remove( ( Nums{ 3, 4, 5, 6, 7, 8, 9 } ) );
@@ -58,8 +60,8 @@ TEST( CellTests, getVal )
 
 TEST( CellTests, compare )
 {
-    Cell c1;
-    Cell c2;
+    TestCell c1;
+    TestCell c2;
 
     EXPECT_EQ( c1, c2 );
 

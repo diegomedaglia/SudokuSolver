@@ -4,13 +4,31 @@
 #include "Utils.h"
 
 using namespace Sudoku;
+
+using TestBoard = Board<3>;
+using InputArray = std::array<std::array<Num, TestBoard::Dimension>, TestBoard::Dimension>;
+
 TEST( BoardTests, CTOR )
 {
-    Board b;
+    TestBoard b;
 
-    for( Num i = 0; i < 9; ++i )
+    for( Num i = 0; i < TestBoard::Dimension; ++i )
     {
-        for( Num j = 0; j < 9; ++j )
+        for( Num j = 0; j < TestBoard::Dimension; ++j )
+        {
+            auto cell = b.cell( i, j );
+            ASSERT_EQ( cell.possibilities(), ( Nums{ 1,2,3,4,5,6,7,8,9 } ) );
+        }
+    }
+}
+
+TEST( BoardTests, CTOR2 )
+{
+    TestBoard b;
+
+    for( Num i = 0; i < TestBoard::Dimension; ++i )
+    {
+        for( Num j = 0; j < TestBoard::Dimension; ++j )
         {
             auto cell = b.cell( i, j );
             ASSERT_EQ( cell.possibilities(), ( Nums{ 1,2,3,4,5,6,7,8,9 } ) );
@@ -20,7 +38,7 @@ TEST( BoardTests, CTOR )
 
 TEST( BoardTests, updateInRow )
 {
-    Board b;
+    TestBoard b;
 
     b.set( 0, 0, 1 );
     auto cell = b.cell( 0, 0 );
@@ -40,7 +58,7 @@ TEST( BoardTests, updateInRow )
 
 TEST( BoardTests, updateInCol )
 {
-    Board b;
+    TestBoard b;
 
     b.set( 0, 0, 1 );
     auto cell = b.cell( 0, 0 );
@@ -59,7 +77,7 @@ TEST( BoardTests, updateInCol )
 
 TEST( BoardTests, updateInQuadrant )
 {
-    Board b;
+    TestBoard b;
 
     for( Num row = 0; row < 7; row += 3 )
     {
@@ -84,7 +102,7 @@ TEST( BoardTests, updateInQuadrant )
 
 TEST( BoardTests, CTOR_2 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         { 
             {0,0,0,0,0,0,0,0,0}, 
             {5,9,0,0,3,4,6,0,0},
@@ -98,11 +116,11 @@ TEST( BoardTests, CTOR_2 )
         }
     };
     
-    Board b( values );
+    TestBoard b( values );
 
-    for( Num i = 0; i < 9; ++i )
+    for( Num i = 0; i < TestBoard::Dimension; ++i )
     {
-        for( Num j = 0; j < 9; ++j )
+        for( Num j = 0; j < TestBoard::Dimension; ++j )
         {
             auto cell = b.cell( i, j );
             if( values[i][j] != 0 )
@@ -116,7 +134,7 @@ TEST( BoardTests, CTOR_2 )
 
 TEST( BoardTests, CTOR_3 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -130,7 +148,7 @@ TEST( BoardTests, CTOR_3 )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
         for( Num j = 1; j < 9; ++j )
         {
@@ -147,7 +165,7 @@ TEST( BoardTests, CTOR_3 )
 
 TEST( BoardTests, CTOR_4 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,0,0,0,0,0,0,0,9},
             {0,4,0,0,0,0,0,0,0},
@@ -161,7 +179,7 @@ TEST( BoardTests, CTOR_4 )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     EXPECT_EQ( b.cell( 0, 1 ).possibilities(), ( Nums{ 2,3,5,6,7,8 } ) );
     EXPECT_EQ( b.cell( 0, 2 ).possibilities(), ( Nums{ 2,3,5,6,7,8 } ) );
@@ -175,7 +193,7 @@ TEST( BoardTests, CTOR_4 )
 
 TEST( BoardTests, updateLoop1 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,7,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -189,7 +207,7 @@ TEST( BoardTests, updateLoop1 )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     EXPECT_EQ( b.at( 0, 7 ), 8 );
     EXPECT_EQ( b.at( 0, 8 ), 9 );
@@ -197,7 +215,7 @@ TEST( BoardTests, updateLoop1 )
 
 TEST( BoardTests, updateLoop2 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,7,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -211,7 +229,7 @@ TEST( BoardTests, updateLoop2 )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     EXPECT_EQ( b.at( 0, 7 ), 8 );
     EXPECT_EQ( b.at( 0, 8 ), 9 );
@@ -219,7 +237,7 @@ TEST( BoardTests, updateLoop2 )
 
 TEST( BoardTests, sortedPossibilities )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,0,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -233,7 +251,7 @@ TEST( BoardTests, sortedPossibilities )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     auto sorted = b.sortedPossibilities();
 
@@ -247,7 +265,7 @@ TEST( BoardTests, sortedPossibilities )
 
 TEST( BoardTests, invalidBoardRow )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,1,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -261,14 +279,14 @@ TEST( BoardTests, invalidBoardRow )
         }
     };
     
-    std::shared_ptr<Board> board;
+    std::shared_ptr<TestBoard> board;
 
-    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+    ASSERT_THROW( board.reset( new TestBoard( values ) ), std::invalid_argument ) << board;
 }
 
 TEST( BoardTests, invalidBoardCol )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,7,0,0},
             {0,0,0,0,0,0,0,0,0},
@@ -282,14 +300,14 @@ TEST( BoardTests, invalidBoardCol )
         }
     };
     
-    std::shared_ptr<Board> board;
+    std::shared_ptr<TestBoard> board;
 
-    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+    ASSERT_THROW( board.reset( new TestBoard( values ) ), std::invalid_argument ) << board;
 }
 
 TEST( BoardTests, invalidBoardQuadrant )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,7,0,0},
             {0,1,0,0,0,0,0,0,0},
@@ -303,14 +321,14 @@ TEST( BoardTests, invalidBoardQuadrant )
         }
     };
 
-    std::shared_ptr<Board> board;
+    std::shared_ptr<TestBoard> board;
 
-    ASSERT_THROW( board.reset( new Board( values ) ), std::invalid_argument ) << board;
+    ASSERT_THROW( board.reset( new TestBoard( values ) ), std::invalid_argument ) << board;
 }
 
 TEST( BoardTests, solved )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {1,2,3,4,5,6,7,8,9},
             {4,5,6,7,8,9,1,2,3},
@@ -324,7 +342,7 @@ TEST( BoardTests, solved )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     ASSERT_TRUE( b.sortedPossibilities().empty() );
     ASSERT_TRUE( b.isSolved() );
@@ -332,7 +350,7 @@ TEST( BoardTests, solved )
 
 TEST( BoardTests, simpleSolve )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,4,5,6,7,8,9},
             {4,5,6,7,8,9,1,2,3},
@@ -346,7 +364,7 @@ TEST( BoardTests, simpleSolve )
         }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     ASSERT_TRUE( b.sortedPossibilities().empty() );
     ASSERT_TRUE( b.isSolved() );
@@ -356,16 +374,16 @@ TEST( BoardTests, simpleSolve )
 
 TEST( BoardTests, compare1 )
 {
-    Board b1;
-    Board b2;
+    TestBoard b1;
+    TestBoard b2;
 
     ASSERT_EQ( b1, b2 );
 }
 
 TEST( BoardTests, compare2 )
 {
-    Board b1;
-    Board b2{ 
+    TestBoard b1;
+    TestBoard b2{ 
         {
             {
                 {0,0,0,4,5,6,7,8,9},
@@ -386,7 +404,7 @@ TEST( BoardTests, compare2 )
 
 TEST( BoardTests, compare3 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0, 0, 0, 4, 5, 6, 7, 8, 9},
             { 4,5,6,7,8,9,1,2,3 },
@@ -400,15 +418,15 @@ TEST( BoardTests, compare3 )
         }
     };
     
-    Board b1( values );
-    Board b2( values );
+    TestBoard b1( values );
+    TestBoard b2( values );
 
     ASSERT_EQ( b1, b2 );
 }
 
 TEST( BoardTests, compare4 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,0,0,0,0,0,0},
             {5,9,0,0,3,4,6,0,0},
@@ -422,8 +440,8 @@ TEST( BoardTests, compare4 )
         }
     };
 
-    Board b1( values );
-    Board b2( values );
+    TestBoard b1( values );
+    TestBoard b2( values );
 
     b2.set( 8, 8, 1 );
 
@@ -432,7 +450,7 @@ TEST( BoardTests, compare4 )
 
 TEST( BoardTests, getRow )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,0,0,0,0,0,0},
             {5,9,0,0,3,4,6,0,0},
@@ -446,7 +464,7 @@ TEST( BoardTests, getRow )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
     
     auto row = b1.getRowCells( 1 );
 
@@ -456,7 +474,7 @@ TEST( BoardTests, getRow )
 
 TEST( BoardTests, getCol )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,0,0,0,0,0,0},
             {5,9,0,0,3,4,6,0,0},
@@ -470,7 +488,7 @@ TEST( BoardTests, getCol )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
 
     auto col = b1.getColCells( 1 );
 
@@ -480,7 +498,7 @@ TEST( BoardTests, getCol )
 
 TEST( BoardTests, getQuadrantCells )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,0,0,0,0,0,0},
             {5,9,0,0,3,4,6,0,0},
@@ -494,7 +512,7 @@ TEST( BoardTests, getQuadrantCells )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
 
     auto q = b1.getQuadrantCells( 2 );
 
@@ -504,7 +522,7 @@ TEST( BoardTests, getQuadrantCells )
 
 TEST( BoardTests, updateGroup1 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,0,0,0,0,0,0,0,0},
             {1,7,0,0,0,0,0,0,0},
@@ -518,12 +536,12 @@ TEST( BoardTests, updateGroup1 )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
 
     ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
     ASSERT_EQ( b1.cell( 0, 1 ).possibilities(), ( Nums{ 8,9 } ) );
 
-    for( Num i = 2; i < DIMS; ++i )
+    for( Num i = 2; i < TestBoard::Dimension; ++i )
     {
         auto possibilities = b1.cell( 0, i ).possibilities();
         EXPECT_FALSE( contains( possibilities, 8 ) );
@@ -539,7 +557,7 @@ TEST( BoardTests, updateGroup1 )
 
 TEST( BoardTests, updateGroup2 )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,1,2,3,4,5,6,7,0},
             {0,7,6,2,1,0,5,4,3},
@@ -554,12 +572,12 @@ TEST( BoardTests, updateGroup2 )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
 
     ASSERT_EQ( b1.cell( 0, 0 ).possibilities(), ( Nums{ 8,9 } ) );
     ASSERT_EQ( b1.cell( 1, 0 ).possibilities(), ( Nums{ 8,9 } ) );
 
-    for( Num i = 2; i < DIMS; ++i )
+    for( Num i = 2; i < TestBoard::Dimension; ++i )
     {
         auto possibilities = b1.cell( i, 0 ).possibilities();
         EXPECT_FALSE( contains( possibilities, 8 ) );
@@ -574,13 +592,13 @@ TEST( BoardTests, updateGroup2 )
 
 TEST( BoardTests, hash )
 {
-    BoardHasher boardHasher{};
-    Board b;
-    Board b2;
+    BoardHasher<TestBoard> boardHasher{};
+    TestBoard b;
+    TestBoard b2;
 
     EXPECT_EQ( boardHasher( b ), boardHasher( b2 ) );
 
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
         {
             {0,1,2,3,4,5,6,7,0},
             {0,7,6,2,1,0,5,4,3},
@@ -595,11 +613,11 @@ TEST( BoardTests, hash )
         }
     };
 
-    Board b1( values );
+    TestBoard b1( values );
 
     EXPECT_NE( boardHasher( b1 ), boardHasher( b2 ) );
 
-    Board b3( values );
+    TestBoard b3( values );
 
     EXPECT_EQ( boardHasher( b1 ), boardHasher( b3 ) );
 
@@ -609,7 +627,7 @@ TEST( BoardTests, hash )
 
 TEST( BoardTests, printBoard )
 {
-    std::array<std::array<Num, 9>, 9> values{
+    InputArray values{
     {
         {0,0,0,0,0,0,0,0,0},
         {5,9,0,0,3,4,6,0,0},
@@ -623,7 +641,7 @@ TEST( BoardTests, printBoard )
     }
     };
 
-    Board b( values );
+    TestBoard b( values );
 
     ASSERT_NO_THROW( std::cout << b << std::endl );
 }

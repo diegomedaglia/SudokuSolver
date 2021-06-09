@@ -11,10 +11,10 @@ int main(int argc, char* argv[] )
         return 1;
     }
 
-    Sudoku::Board board;
+    Sudoku::Board<3> board;
     try
     {
-        board = Sudoku::parseFile( argv[1] );
+        board = Sudoku::parseFile<Sudoku::Board<3>>( argv[1] );
     }
     catch( std::exception& ex )
     {

@@ -4,6 +4,8 @@
 
 using namespace Sudoku;
 
+using TestBoard = Sudoku::Board<3>;
+
 //0 0 0 0 0 0 0 0 0
 //5 9 0 0 3 4 6 0 0
 //0 6 0 0 0 0 0 8 0
@@ -15,8 +17,8 @@ using namespace Sudoku;
 //0 5 0 0 7 0 0 0 0
 TEST( FileParserTests, good )
 {
-    Board b;
-    ASSERT_NO_THROW( b = parseFile( "Good.txt" ) );
+    TestBoard b;
+    ASSERT_NO_THROW( b = parseFile<TestBoard>( "Good.txt" ) );
 
     EXPECT_EQ( b.at( 1, 0 ), 5 );
     EXPECT_EQ( b.at( 1, 1 ), 9 );
@@ -37,7 +39,7 @@ TEST( FileParserTests, good )
 //0 5 0 0 7 0 0
 TEST( FileParserTests, incomplete )
 {
-    ASSERT_ANY_THROW( parseFile( "Incomplete.txt" ) );
+    ASSERT_ANY_THROW( parseFile<TestBoard>( "Incomplete.txt" ) );
 }
 
 //0 0 0 0 0 0 0 0 0
@@ -51,5 +53,5 @@ TEST( FileParserTests, incomplete )
 //0 5 0 0 7 0 0 0 a
 TEST( FileParserTests, bad )
 {
-    ASSERT_ANY_THROW( parseFile( "BadInput.txt" ) );
+    ASSERT_ANY_THROW( parseFile<TestBoard>( "BadInput.txt" ) );
 }
