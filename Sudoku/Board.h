@@ -36,7 +36,7 @@ class Board
 public:
     static constexpr Num Dimension = ( BlockSide * BlockSide );
 private:
-    using Cell = Cell<Dimension>;
+    using OurCell = Cell<Dimension>;
 public:
     /**
     * @brief Contructs an empty board (i.e. all cells unassigned).
@@ -47,8 +47,8 @@ public:
     */
     Board( const std::array<std::array<Num, Dimension>, Dimension>& values )
     {
-        performInCells(
-            [this, &values]( auto i, auto j, Cell& cell )
+        performInOurCells(
+            [this, &values]( auto i, auto j, OurCell& cell )
             {
                 auto& val = values[i][j];
                 checkValue<Dimension>( val );
@@ -103,7 +103,7 @@ public:
     * @return A copy of the cell instance
     * @throw std::out_of_range if either coordinates are out of bounds
     */
-    Cell cell( Num row, Num col ) const
+    OurCell cell( Num row, Num col ) const
     {
         checkCoords<Dimension>( row, col );
         return m_board[row][col];
@@ -134,8 +134,8 @@ public:
     {
         CoordPossibilitiesList result;
 
-        performInCells(
-            [&result]( auto i, auto j, Cell& cell )
+        performInOurCells(
+            [&result]( auto i, auto j, OurCell& cell )
             {
                 if( !cell.hasVal() )
                 {
@@ -161,7 +161,7 @@ public:
     {
         bool result = true;
 
-        performInCells(
+        performInOurCells(
             [&result, this]( auto i, auto j, auto& cell )
             {
                 if( cell.possibilities().empty() )
@@ -221,7 +221,7 @@ public:
     bool isSolved() const noexcept
     {
         bool result = true;
-        performInCells(
+        performInOurCells(
             [&result]( auto, auto, auto& cell )
             {
                 if( !cell.hasVal() )
@@ -247,13 +247,13 @@ public:
     * @param row the row
     * @return pointers to cells of the specified row
     */
-    std::vector<Cell*> getRowCells( Num row )
+    std::vector<OurCell*> getRowCells( Num row )
     {
-        std::vector<Cell*> result;
+        std::vector<OurCell*> result;
 
         for( Num i = 0; i < Dimension; ++i )
         {
-            Cell* cellPtr = m_board[row].data() + i;
+            OurCell* cellPtr = m_board[row].data() + i;
             result.push_back( cellPtr );
         }
 
@@ -264,13 +264,13 @@ public:
     * @param col the column
     * @return pointers to cells of the specified column
     */
-    std::vector<Cell*> getColCells( Num col )
+    std::vector<OurCell*> getColCells( Num col )
     {
-        std::vector<Cell*> result;
+        std::vector<OurCell*> result;
 
         for( Num i = 0; i < Dimension; ++i )
         {
-            Cell* cellPtr = m_board[i].data() + col;
+            OurCell* cellPtr = m_board[i].data() + col;
             result.push_back( cellPtr );
         }
         return result;
@@ -280,13 +280,13 @@ public:
     * @param quadrant the quadrant
     * @return pointers to cells of the specified quadrant
     */
-    std::vector<Cell*> getQuadrantCells( Num quadrant )
+    std::vector<OurCell*> getQuadrantCells( Num quadrant )
     {
-        std::vector<Cell*> result;
+        std::vector<OurCell*> result;
 
-        performInQuadrant( quadrant, [&result, this]( auto i, auto j, Cell& )
+        performInQuadrant( quadrant, [&result, this]( auto i, auto j, OurCell& )
             {
-                Cell* cellPtr = m_board[i].data() + j;
+                OurCell* cellPtr = m_board[i].data() + j;
                 result.push_back( cellPtr );
                 return true;
             } );
@@ -319,16 +319,16 @@ public:
     }
 
 private:
-    std::array<std::array<Cell, Dimension>, Dimension> m_board;
+    std::array<std::array<OurCell, Dimension>, Dimension> m_board;
     std::tuple<Num, Num, Num, Num, Num> m_offendingVal;
 
     /**
     * @brief Performs an actions for each cell of the board.
     * @param func the function to call for each cell. It will be called with the
-    * row, column and Cell reference. The function must return true if it should keep
+    * row, column and OurCell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInCells( std::function<bool( const Num, const Num, Cell& )> func )
+    void performInOurCells( std::function<bool( const Num, const Num, OurCell& )> func )
     {
         for( Num i = 0; i < Dimension; ++i )
         {
@@ -342,10 +342,10 @@ private:
     /**
     * @brief Performs an actions for each cell of the board.
     * @param func the function to call for each cell. It will be called with the
-    * row, column and Cell reference. The function must return true if it should keep
+    * row, column and OurCell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInCells( std::function<bool( const Num, const Num, const Cell& )> func  ) const
+    void performInOurCells( std::function<bool( const Num, const Num, const OurCell& )> func  ) const
     {
         for( Num i = 0; i < Dimension; ++i )
         {
@@ -360,10 +360,10 @@ private:
     * @brief Performs an actions for each cell of a quadrant.
     * @param quadrant The quadrant to perform the function in each cell
     * @param func the function to call for each cell. It will be called with the
-    * row, column and Cell reference. The function must return true if it should keep
+    * row, column and OurCell reference. The function must return true if it should keep
     * being called for the remaining cells.
     */
-    void performInQuadrant( Num quadrant, std::function<bool( const Num row, const Num col, Cell& )> func )
+    void performInQuadrant( Num quadrant, std::function<bool( const Num row, const Num col, OurCell& )> func )
     {
         const Num rowMult = quadrant / BlockSide;
         const Num colMult = quadrant % BlockSide;
@@ -537,7 +537,7 @@ private:
     * @param cells the cells to be updated
     * @return True if updates occurred, false otherwise
     */
-    bool updateGroup( const std::vector<Cell*>& group ) noexcept
+    bool updateGroup( const std::vector<OurCell*>& group ) noexcept
     {
         bool updatedOne = false;
 
@@ -546,7 +546,7 @@ private:
         // three cells with possibilities = {1, 2, 4}.
         for( Num i = 2; i < Dimension / 2; ++i )
         {
-            std::vector<Cell*> cellsWithSamePossibilities;
+            std::vector<OurCell*> cellsWithSamePossibilities;
             for( auto cell : group )
             {
                 if( cell->possibilities().size() == i )
@@ -579,6 +579,20 @@ private:
         }
         return updatedOne;
     }
+
+    friend std::ostream& operator<<( std::ostream& stream, const Board& board )
+    {
+        for( Sudoku::Num i = 0; i < board.Dimension; ++i )
+        {
+            for( Sudoku::Num j = 0; j < board.Dimension; ++j )
+            {
+            stream << std::to_string( board.at( i, j ) ) << " ";
+            }
+            stream << std::endl;
+        }
+        return stream;
+    }
+
 };
 
 
@@ -645,16 +659,3 @@ private:
 
 } // namespace
 
-template<std::size_t Dims>
-std::ostream& operator<<( std::ostream& stream, const Sudoku::Board<Dims>& board )
-{
-    for( Sudoku::Num i = 0; i < board.Dimension; ++i )
-    {
-        for( Sudoku::Num j = 0; j < board.Dimension; ++j )
-        {
-            stream << std::to_string( board.at( i, j ) ) << " ";
-        }
-        stream << std::endl;
-    }
-    return stream;
-}
