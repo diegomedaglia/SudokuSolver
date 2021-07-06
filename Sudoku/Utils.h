@@ -7,18 +7,6 @@
 
 namespace Sudoku
 {
-    /**
-* @brief Checks if the coordinates provided are valid
-* @param line coordinate line
-* @param col coordinate column
-* @throw std::out_of_range if any coordinate is greater than 8
-*/
-template<std::size_t Dims>
-void checkCoords( Num line, Num col )
-{
-    checkCoord<Dims>( line );
-    checkCoord<Dims>( col );
-}
 /**
 * @brief Checks if the coordinate provided is valid
 * @param coord coordinate 
@@ -30,6 +18,20 @@ void checkCoord( Num coord )
     if( coord > Dims - 1 )
         throw std::out_of_range( "invalid coordinate: " + std::to_string( coord ) );
 }
+
+/**
+* @brief Checks if the coordinates provided are valid
+* @param line coordinate line
+* @param col coordinate column
+* @throw std::out_of_range if any coordinate is greater than 8
+*/
+template<std::size_t Dims>
+void checkCoords( Num line, Num col )
+{
+    checkCoord<Dims>( line );
+    checkCoord<Dims>( col );
+}
+
 /**
 * @brief Checks if the value provided is valid
 * @param value The value to check
