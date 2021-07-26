@@ -36,3 +36,5 @@ out/
 /CMakeSettings.json
 /Testing/
 /out2
+.vscode/
+build/
