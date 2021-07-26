@@ -17,8 +17,8 @@ Sudoku::Board Sudoku::parseFile( Num BlockSize, const std::string& filename )
 
     Board::InputArray values( Dims, Nums( Dims ) );
 
-    int i = 0;
-    int j = 0;
+    decltype(Dims) i = 0;
+    decltype(Dims) j = 0;
 
     while( i < Dims && !filestream.fail() )
     {
