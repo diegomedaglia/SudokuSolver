@@ -4,7 +4,7 @@
 
 using namespace Sudoku;
 
-using TestBoard = Sudoku::Board<3>;
+using TestBoard = Sudoku::Board;
 
 //0 0 0 0 0 0 0 0 0
 //5 9 0 0 3 4 6 0 0
@@ -17,8 +17,8 @@ using TestBoard = Sudoku::Board<3>;
 //0 5 0 0 7 0 0 0 0
 TEST( FileParserTests, good )
 {
-    TestBoard b;
-    ASSERT_NO_THROW( b = parseFile<TestBoard>( "Good.txt" ) );
+    TestBoard b( 3 );
+    ASSERT_NO_THROW( b = parseFile( 3, "Good.txt" ) );
 
     EXPECT_EQ( b.at( 1, 0 ), 5 );
     EXPECT_EQ( b.at( 1, 1 ), 9 );
@@ -39,7 +39,7 @@ TEST( FileParserTests, good )
 //0 5 0 0 7 0 0
 TEST( FileParserTests, incomplete )
 {
-    ASSERT_ANY_THROW( parseFile<TestBoard>( "Incomplete.txt" ) );
+    ASSERT_ANY_THROW( parseFile( 3, "Incomplete.txt" ) );
 }
 
 //0 0 0 0 0 0 0 0 0
@@ -53,5 +53,14 @@ TEST( FileParserTests, incomplete )
 //0 5 0 0 7 0 0 0 a
 TEST( FileParserTests, bad )
 {
-    ASSERT_ANY_THROW( parseFile<TestBoard>( "BadInput.txt" ) );
+    ASSERT_ANY_THROW( parseFile( 3, "BadInput.txt" ) );
+}
+
+TEST( FileParserTests, Large )
+{
+    Board b( 4 );
+    ASSERT_NO_THROW( b = parseFile( 4, "Large16x16.txt" ) );
+    EXPECT_EQ( b.at( 15, 15 ), 2 );
+    EXPECT_EQ( b.at( 0, 0 ), 14 );
+    EXPECT_EQ( b.at( 13, 1 ), 15 );
 }

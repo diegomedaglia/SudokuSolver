@@ -4,6 +4,6 @@
 
 namespace Sudoku
 {
-using Num = std::uint8_t;
+using Num = std::uint64_t;
 using Nums = std::vector<Num>;
 }

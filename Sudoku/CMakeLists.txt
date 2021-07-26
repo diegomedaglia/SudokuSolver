@@ -1,17 +1,24 @@
 cmake_minimum_required (VERSION 3.11)
 
 set( SOURCES 
-    "Cell.h" 
-    "Board.h" 
+    "Board.cpp"
+    "Board.h"
+    "BoardHasher.cpp"
+    "BoardHasher.h"
+    "Cell.cpp"
+    "Cell.h"
     "Common.h"
-    "Utils.h"  
-    "FileParser.h" 
+    "FileParser.cpp"
+    "FileParser.h"
+    "Solver.cpp"
     "Solver.h"
+    "Utils.cpp"
+    "Utils.h"
     )
     
-add_library ( Sudoku INTERFACE )
+add_library ( Sudoku ${SOURCES} )
 
 target_include_directories( Sudoku 
-                INTERFACE
+                PUBLIC
                 "${CMAKE_CURRENT_SOURCE_DIR}"
 )

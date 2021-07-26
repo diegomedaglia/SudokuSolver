@@ -1,20 +1,45 @@
 #include <iostream>
 #include <chrono>
+#include <string>
+#include <sstream>
 #include "FileParser.h"
 #include "Solver.h"
+#include "Utils.h"
 
 int main(int argc, char* argv[] )
 {
-    if( argc < 2 )
+    if( argc < 3 )
     {
-        std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <region side length> <filename>" << std::endl << std::endl;
         return 1;
     }
 
-    Sudoku::Board<3> board;
+    Sudoku::Num blockSize = 0;
+
     try
     {
-        board = Sudoku::parseFile<Sudoku::Board<3>>( argv[1] );
+        auto size = std::stoul( argv[1], nullptr, 0 );
+        if( size > std::numeric_limits<Sudoku::Num>::max() )
+        {
+            throw std::out_of_range( []() { 
+                std::stringstream ss( "Max value supported is " ); 
+                ss << std::numeric_limits<Sudoku::Num>::max(); 
+                return ss.str(); 
+                }() );
+        }
+
+        blockSize = static_cast<Sudoku::Num>( size );
+    }
+    catch( const std::exception& ex )
+    {
+        std::cerr << ex.what() << std::endl;
+        return 1;
+    }
+
+    Sudoku::Board board( blockSize );
+    try
+    {
+        board = Sudoku::parseFile( blockSize, argv[2] );
     }
     catch( std::exception& ex )
     {

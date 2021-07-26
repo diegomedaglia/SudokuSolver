@@ -1,48 +1,36 @@
 #pragma once
 #include <algorithm>
-#include <string>
-#include <stdexcept>
-#include <array>
+#include <ostream>
+
+#include "Board.h"
 #include "Common.h"
 
 namespace Sudoku
 {
 /**
 * @brief Checks if the coordinate provided is valid
+* @param Dims The dimension size of the board
 * @param coord coordinate 
 * @throw std::out_of_range if the coordinate is greater than 8
 */
-template<std::size_t Dims>
-void checkCoord( Num coord )
-{
-    if( coord > Dims - 1 )
-        throw std::out_of_range( "invalid coordinate: " + std::to_string( coord ) );
-}
+    void checkCoord( Num Dims, Num coord );
 
 /**
 * @brief Checks if the coordinates provided are valid
+* @param Dims The dimension size of the board
 * @param line coordinate line
 * @param col coordinate column
 * @throw std::out_of_range if any coordinate is greater than 8
 */
-template<std::size_t Dims>
-void checkCoords( Num line, Num col )
-{
-    checkCoord<Dims>( line );
-    checkCoord<Dims>( col );
-}
+    void checkCoords( Num Dims, Num line, Num col );
 
 /**
 * @brief Checks if the value provided is valid
+* @param Dims The dimension size of the board
 * @param value The value to check
 * @throw std::invalid_argument if the value is greater than 9
 */
-template<std::size_t Dims>
-void checkValue( Num value )
-{
-    if( value > Dims )
-        throw std::invalid_argument( "invalid value: " + std::to_string( value ) );
-}
+    void checkValue( Num Dims, Num value );
 
 /**
 * @brief Checks if a vector of Num contains a value
@@ -56,3 +44,5 @@ inline bool contains( const Nums& nums, Num val ) noexcept
 }
 
 }
+
+std::ostream& operator<<( std::ostream& stream, const Sudoku::Board& board );
